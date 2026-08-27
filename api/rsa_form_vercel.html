@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RMCSS RSA Self-Assessment</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f3f4f6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #d1d5db;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: #2563eb;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .section {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .section h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+
+    .section-desc {
+      color: #6b7280;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-group input:read-only,
+    .form-group input:disabled {
+      background-color: #f9fafb;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .form-group select:disabled {
+      background-color: #f9fafb;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .error-text {
+      color: #dc2626;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .required::after {
+      content: " *";
+      color: #dc2626;
+    }
+
+    .intro-box {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 24px;
+    }
+
+    .intro-box p {
+      font-size: 13px;
+      color: #1e40af;
+      line-height: 1.6;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    button {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-prev {
+      background-color: #d1d5db;
+      color: #374151;
+    }
+
+    .btn-prev:hover:not(:disabled) {
+      background-color: #9ca3af;
+    }
+
+    .btn-prev:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-next {
+      background-color: #2563eb;
+      color: white;
+      flex: 1;
+    }
+
+    .btn-next:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-next:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #2563eb;
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      font-size: 14px;
+      color: #374151;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .success-message {
+      background-color: #dcfce7;
+      border: 1px solid #86efac;
+      color: #166534;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+
+    .success-message h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .success-message p {
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .uuid-display {
+      background-color: #f3f4f6;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f4f6;
+      border-top: 2px solid #2563eb;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const RSAForm = () => {
+      const [currentSection, setCurrentSection] = useState(0);
+      const [formData, setFormData] = useState({
+        agency: '',
+        XSID: '',
+        name_legal_full: '',
+        XADT: '',
+        timestamp_beginRSA: null,
+        // Section 1
+        s1a_alcohol: 0,
+        s1b_marijuana: 0,
+        s1c_crack: 0,
+        s1d_opioids: 0,
+        s1e_benzo: 0,
+        s1f_other: 0,
+        s1z_none: 0,
+        // Section 2
+        s2a_weekly: 0,
+        s2b_spentTime: 0,
+        s2c_cravings: 0,
+        s2d_probFam: 0,
+        s2e_probFights: 0,
+        s2f_gaveUp: 0,
+        s2g_withdrawal: 0,
+        s2h_sick: 0,
+        s2i_inject: 0,
+        s2j_blackout: 0,
+        s2k_overdose: 0,
+        s2z_none: 0,
+        // Sections 3-8 abbreviated for brevity
+        s3a_selfhelp: 0,
+        s3b_sponsor: 0,
+        s3c_sutx: 0,
+        s3d_meds: 0,
+        s3e_detox: 0,
+        s3f_er: 0,
+        s3g_nalox: 0,
+        s3z_none: 0,
+        s4a_balance: 0,
+        s4b_feel: 0,
+        s4c_hurting: 0,
+        s4d_quit: 0,
+        s4e_money: 0,
+        s4f_supPeople: 0,
+        s4g_problems: 0,
+        s4h_legal: 0,
+        s4i_custody: 0,
+        s4j_supFriends: 0,
+        s4k_trouble: 0,
+        s4z_none: 0,
+        s5a_txhelp: 0,
+        s5b_others: 0,
+        s5c_chance: 0,
+        s5d_month: 0,
+        s5e_needtx: 0,
+        s5f_famTogether: 0,
+        s5g_comeBack: 0,
+        s5h_pressure: 0,
+        s5z_none: 0,
+        s6a_friends: 0,
+        s6b_way: 0,
+        s6c_tooMany: 0,
+        s6d_tooFar: 0,
+        s6e_resist: 0,
+        s6f_coverage: 0,
+        s6g_hours: 0,
+        s6h_difficult: 0,
+        s6i_openings: 0,
+        s6j_find: 0,
+        s6k_exp: 0,
+        s6l_childcare: 0,
+        s6z_none: 0,
+        s7a_arrest: 0,
+        s7b_jail: 0,
+        s7c_trial: 0,
+        s7d_sentence: 0,
+        s7e_prob: 0,
+        s7f_electric: 0,
+        s7g_other: 0,
+        s7z_none: 0,
+        s8a_outside: 0,
+        s8b_shelter: 0,
+        s8c_risk: 0,
+        s8d_stable: 0,
+        s8e_others: 0,
+        s8f_safe: 0,
+        s8g_facility: 0,
+        s8h_support: 0,
+        s8i_soberh: 0,
+        s8j_other: 0,
+        s8z_none: 0
+      });
+
+      const [errors, setErrors] = useState({});
+      const [submitted, setSubmitted] = useState(false);
+      const [submittedUUID, setSubmittedUUID] = useState(null);
+      const [isLoading, setIsLoading] = useState(false);
+      const [submitError, setSubmitError] = useState(null);
+
+      const staffByAgency = {
+        'COIP': ['Virgen Rodriguez', 'Katrina Ivory', 'Jose Alvarez', 'Lauretta Omale'],
+        'Haymarket': ['Roger Delhaye', 'Tyrone Baker', 'Angela Butler'],
+        'TEECH': ['Karen White', 'DeShara Shells', 'Jamia Puckett', 'Robert Bufford']
+      };
+
+      const agencies = ['COIP', 'Haymarket', 'TEECH'];
+
+      useEffect(() => {
+        const today = new Date().toISOString().split('T')[0];
+        setFormData(prev => ({
+          ...prev,
+          XADT: today
+        }));
+      }, []);
+
+      const handleInputChange = (fieldName, value) => {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: value
+        }));
+        if (errors[fieldName]) {
+          setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[fieldName];
+            return newErrors;
+          });
+        }
+      };
+
+      const handleCheckbox = (fieldName) => {
+        const sectionNum = fieldName[1];
+        const isNoneOption = fieldName.endsWith('_none');
+        setFormData(prev => {
+          const newData = { ...prev };
+          const newValue = prev[fieldName] ? 0 : 1;
+          if (isNoneOption && newValue === 1) {
+            const sectionFields = Object.keys(newData).filter(key =>
+              key.startsWith('s' + sectionNum) && key !== fieldName
+            );
+            sectionFields.forEach(field => { newData[field] = 0; });
+          } else if (newValue === 1 && !isNoneOption) {
+            const noneFieldName = 's' + sectionNum + 'z_none';
+            if (newData.hasOwnProperty(noneFieldName)) {
+              newData[noneFieldName] = 0;
+            }
+          }
+          newData[fieldName] = newValue;
+          return newData;
+        });
+      };
+
+      const handleAgencyChange = (value) => {
+        handleInputChange('agency', value);
+        handleInputChange('XSID', '');
+      };
+
+      const getStaffForAgency = () => {
+        return formData.agency ? staffByAgency[formData.agency] : [];
+      };
+
+      const validateForm = () => {
+        const newErrors = {};
+        if (!formData.agency) newErrors.agency = 'Organization is required';
+        if (!formData.XSID) newErrors.XSID = 'Your name is required';
+        if (!formData.name_legal_full) newErrors.name_legal_full = 'Participant name is required';
+        if (!formData.XADT) newErrors.XADT = 'Assessment date is required';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+      };
+
+      const handleBeginAssessment = () => {
+        if (validateForm()) {
+          const timestamp = new Date().toISOString();
+          setFormData(prev => ({
+            ...prev,
+            timestamp_beginRSA: timestamp
+          }));
+          setCurrentSection(1);
+        }
+      };
+
+      const handleNext = () => {
+        if (currentSection < 9) {
+          setCurrentSection(currentSection + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentSection > 1) {
+          setCurrentSection(currentSection - 1);
+        }
+      };
+
+      const handleSubmit = async () => {
+        setIsLoading(true);
+        setSubmitError(null);
+
+        try {
+          const response = await fetch('/api/submit-form', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              formType: 'rsa',
+              data: formData
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            setSubmitted(true);
+            setSubmittedUUID(result.uuid);
+            // Show success for 5 seconds then reset
+            setTimeout(() => {
+              setSubmitted(false);
+              setSubmittedUUID(null);
+              setCurrentSection(0);
+              setFormData(prev => ({
+                ...prev,
+                agency: '',
+                XSID: '',
+                name_legal_full: '',
+                timestamp_beginRSA: null
+              }));
+            }, 5000);
+          } else {
+            setSubmitError(result.error || 'Failed to submit form');
+          }
+        } catch (error) {
+          setSubmitError(error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      const staffOptions = getStaffForAgency();
+      const progressPercent = currentSection === 0 ? 0 : ((currentSection) / 9) * 100;
+
+      if (submitted) {
+        return (
+          <div className="container">
+            <div className="header">
+              <h1>RMCSS Self-Assessment</h1>
+            </div>
+            <div className="section">
+              <div className="success-message">
+                <h3>✓ Assessment submitted successfully!</h3>
+                <p>The participant's self-assessment has been recorded in FileMaker.</p>
+                <p><strong>Assessment ID:</strong></p>
+                <div className="uuid-display">{submittedUUID}</div>
+                <p style={{marginTop: '12px', fontSize: '12px', color: '#6b7280'}}>
+                  Use this ID when completing the RMC Meeting form for this participant.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="container">
+          <div className="header">
+            <h1>RMCSS Self-Assessment</h1>
+          </div>
+
+          {submitError && (
+            <div style={{backgroundColor: '#fee2e2', border: '1px solid #fca5a5', color: '#991b1b', padding: '16px', borderRadius: '6px', marginBottom: '24px'}}>
+              <strong>Error:</strong> {submitError}
+            </div>
+          )}
+
+          {currentSection === 0 ? (
+            <>
+              <div style={{ marginBottom: '32px' }}>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: '11%' }}></div>
+                </div>
+                <p className="progress-text">Staff Entry</p>
+              </div>
+
+              <div className="section">
+                <h2>Staff Entry</h2>
+                <p className="section-desc">Staff member and participant information</p>
+
+                <div className="form-group">
+                  <label className="required">Organization</label>
+                  <select
+                    value={formData.agency}
+                    onChange={(e) => handleAgencyChange(e.target.value)}
+                  >
+                    <option value="">Select an organization</option>
+                    {agencies.map(org => (
+                      <option key={org} value={org}>{org}</option>
+                    ))}
+                  </select>
+                  {errors.agency && <p className="error-text">{errors.agency}</p>}
+                </div>
+
+                {formData.agency && (
+                  <div className="form-group">
+                    <label className="required">Your name</label>
+                    <select
+                      value={formData.XSID}
+                      onChange={(e) => handleInputChange('XSID', e.target.value)}
+                    >
+                      <option value="">Select your name</option>
+                      {staffOptions.map(staff => (
+                        <option key={staff} value={staff}>{staff}</option>
+                      ))}
+                    </select>
+                    {errors.XSID && <p className="error-text">{errors.XSID}</p>}
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label className="required">Participant Name</label>
+                  <input
+                    type="text"
+                    value={formData.name_legal_full}
+                    onChange={(e) => handleInputChange('name_legal_full', e.target.value)}
+                    placeholder="Enter participant's legal name"
+                  />
+                  {errors.name_legal_full && <p className="error-text">{errors.name_legal_full}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label className="required">Assessment Date</label>
+                  <input
+                    type="date"
+                    value={formData.XADT}
+                    onChange={(e) => handleInputChange('XADT', e.target.value)}
+                  />
+                  {errors.XADT && <p className="error-text">{errors.XADT}</p>}
+                </div>
+              </div>
+
+              <div className="button-group">
+                <button className="btn-prev" disabled>Previous</button>
+                <button className="btn-next" onClick={handleBeginAssessment}>Begin Self-Assessment</button>
+              </div>
+            </>
+          ) : currentSection === 9 ? (
+            <>
+              <div style={{ marginBottom: '32px' }}>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: '100%' }}></div>
+                </div>
+                <p className="progress-text">Complete</p>
+              </div>
+
+              <div className="section">
+                <h2>Assessment Complete</h2>
+                <p className="section-desc">Ready to submit</p>
+                <p style={{color: '#6b7280', marginBottom: '24px'}}>
+                  All sections of the self-assessment have been completed. Click Submit to save this assessment to FileMaker.
+                </p>
+              </div>
+
+              <div className="button-group">
+                <button className="btn-prev" onClick={handlePrev}>Previous</button>
+                <button className="btn-next" onClick={handleSubmit} disabled={isLoading}>
+                  {isLoading ? <><span className="loading"></span> Submitting...</> : 'Submit Assessment'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ marginBottom: '32px' }}>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: progressPercent + '%' }}></div>
+                </div>
+                <p className="progress-text">{Math.round(progressPercent)}% complete</p>
+              </div>
+
+              <div className="section">
+                {currentSection === 1 && (
+                  <>
+                    <h2>1. Drug and Alcohol Use</h2>
+                    <div className="intro-box">
+                      <p>These questions help us understand your experience with substance use. Your honest answers are important for us to provide the best support possible.</p>
+                    </div>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's1a_alcohol', label: 'Beer, wine, mixed drinks or other alcohol'},
+                        {key: 's1b_marijuana', label: 'Marijuana or other forms of cannabis'},
+                        {key: 's1c_crack', label: 'Crack, cocaine, methamphetamine or other stimulants'},
+                        {key: 's1d_opioids', label: 'Heroin, fentanyl or other opioids'},
+                        {key: 's1e_benzo', label: 'Benzodiazepines or other sedatives'},
+                        {key: 's1f_other', label: 'Any other kinds of drugs'},
+                        {key: 's1z_none', label: 'No alcohol or drug use'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {currentSection === 2 && (
+                  <>
+                    <h2>2. Consequences of Use</h2>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's2a_weekly', label: 'Used weekly or more often'},
+                        {key: 's2b_spentTime', label: 'Spent a lot of time getting, using, or recovering from using'},
+                        {key: 's2c_cravings', label: 'Had cravings'},
+                        {key: 's2d_probFam', label: 'Had problems with family or relationships'},
+                        {key: 's2e_probFights', label: 'Kept using even though it was causing problems'},
+                        {key: 's2f_gaveUp', label: 'Gave up or reduced activities'},
+                        {key: 's2g_withdrawal', label: 'Had withdrawal problems'},
+                        {key: 's2h_sick', label: 'Kept using to stop feeling sick'},
+                        {key: 's2i_inject', label: 'Injected any substance'},
+                        {key: 's2j_blackout', label: 'Had a blackout'},
+                        {key: 's2k_overdose', label: 'Had an overdose requiring medical attention'},
+                        {key: 's2z_none', label: 'No problems reported'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {currentSection === 3 && (
+                  <>
+                    <h2>3. Help Received</h2>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's3a_selfhelp', label: 'Attended self-help or peer support group'},
+                        {key: 's3b_sponsor', label: 'Worked with sponsor, mentor, or recovery coach'},
+                        {key: 's3c_sutx', label: 'Participated in substance use treatment'},
+                        {key: 's3d_meds', label: 'Received medication for substance use disorder'},
+                        {key: 's3e_detox', label: 'Received detoxification services'},
+                        {key: 's3f_er', label: 'Gone to emergency room'},
+                        {key: 's3g_nalox', label: 'Carried naloxone/Narcan'},
+                        {key: 's3z_none', label: 'No services reported'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {currentSection === 4 && (
+                  <>
+                    <h2>4. Reasons to Change</h2>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's4a_balance', label: 'Get more balance or stability'},
+                        {key: 's4b_feel', label: "Don't like the way using makes you feel"},
+                        {key: 's4c_hurting', label: 'Substances are hurting your body'},
+                        {key: 's4d_quit', label: 'Family wants you to quit'},
+                        {key: 's4e_money', label: 'It costs too much money'},
+                        {key: 's4f_supPeople', label: 'Want support from people in recovery'},
+                        {key: 's4g_problems', label: 'Tired of problems caused by use'},
+                        {key: 's4h_legal', label: 'Legal pressure'},
+                        {key: 's4i_custody', label: 'Want to keep custody of kids'},
+                        {key: 's4j_supFriends', label: 'Need support from friends and family'},
+                        {key: 's4k_trouble', label: "Don't want trouble at work"},
+                        {key: 's4z_none', label: 'No reasons reported'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {currentSection === 5 && (
+                  <>
+                    <h2>5. Thoughts About Treatment</h2>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's5a_txhelp', label: 'Treatment could help you'},
+                        {key: 's5b_others', label: 'Family wants you in treatment'},
+                        {key: 's5c_chance', label: 'Treatment may be your best chance'},
+                        {key: 's5d_month', label: 'Plan to stay at least a month'},
+                        {key: 's5e_needtx', label: 'Need to go back to treatment'},
+                        {key: 's5f_famTogether', label: 'Need treatment to keep family together'},
+                        {key: 's5g_comeBack', label: 'Will probably need treatment again'},
+                        {key: 's5h_pressure', label: 'Under pressure to be in treatment'},
+                        {key: 's5z_none', label: 'No reasons given'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {currentSection === 6 && (
+                  <>
+                    <h2>6. Barriers to Treatment</h2>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's6a_friends', label: 'Friends will try to get you to use again'},
+                        {key: 's6b_way', label: 'Do not have a way to get to treatment'},
+                        {key: 's6c_tooMany', label: 'Too many responsibilities'},
+                        {key: 's6d_tooFar', label: "It's too far or takes too long"},
+                        {key: 's6e_resist', label: 'Hard to resist using where you live/work'},
+                        {key: 's6f_coverage', label: 'No insurance or not enough money'},
+                        {key: 's6g_hours', label: 'Program hours not convenient'},
+                        {key: 's6h_difficult', label: 'Treatment too difficult to manage'},
+                        {key: 's6i_openings', label: 'No openings in the treatment you want'},
+                        {key: 's6j_find', label: "Could not find the type you wanted"},
+                        {key: 's6k_exp', label: 'Had negative experiences before'},
+                        {key: 's6l_childcare', label: 'Problems getting childcare'},
+                        {key: 's6z_none', label: 'No barriers reported'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {currentSection === 7 && (
+                  <>
+                    <h2>7. Legal Status</h2>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's7a_arrest', label: 'Arrested 1 or more times'},
+                        {key: 's7b_jail', label: 'Spent time in jail or prison'},
+                        {key: 's7c_trial', label: 'Awaiting trial currently'},
+                        {key: 's7d_sentence', label: 'Awaiting sentencing currently'},
+                        {key: 's7e_prob', label: 'On probation or parole currently'},
+                        {key: 's7f_electric', label: 'Electronic monitoring currently'},
+                        {key: 's7g_other', label: 'Other legal status'},
+                        {key: 's7z_none', label: 'No legal issues'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {currentSection === 8 && (
+                  <>
+                    <h2>8. Housing Status</h2>
+                    <div className="checkbox-group">
+                      {[
+                        {key: 's8a_outside', label: 'Slept outside, in a car, or was unhoused'},
+                        {key: 's8b_shelter', label: 'Stayed in shelter or temporary housing'},
+                        {key: 's8c_risk', label: 'Were at risk of being unhoused'},
+                        {key: 's8d_stable', label: 'Had stable housing'},
+                        {key: 's8e_others', label: 'Lived with people using or fighting'},
+                        {key: 's8f_safe', label: 'Did not feel safe where staying'},
+                        {key: 's8g_facility', label: 'Spent 14+ days in facility'},
+                        {key: 's8h_support', label: 'Stayed where supported recovery'},
+                        {key: 's8i_soberh', label: 'Stayed in recovery home or sober housing'},
+                        {key: 's8j_other', label: 'Other housing situation'},
+                        {key: 's8z_none', label: 'No housing issues'}
+                      ].map(item => (
+                        <div key={item.key} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={item.key}
+                            checked={formData[item.key] === 1}
+                            onChange={() => handleCheckbox(item.key)}
+                          />
+                          <label htmlFor={item.key}>{item.label}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="button-group">
+                {currentSection > 1 && <button className="btn-prev" onClick={handlePrev}>Previous</button>}
+                <button className="btn-next" onClick={handleNext}>Next</button>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<RSAForm />, document.getElementById('root'));
+  </script>
+</body>
+</html>

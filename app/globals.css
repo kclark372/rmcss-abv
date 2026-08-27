@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+@import 'react-day-picker/style.css';
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-slate-100 text-slate-900 antialiased;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+/* Match the calendar to the indigo used everywhere else. */
+.rdp-root {
+  --rdp-accent-color: var(--color-indigo-600);
+  --rdp-accent-background-color: var(--color-indigo-50);
+  --rdp-day-height: 36px;
+  --rdp-day-width: 36px;
+  --rdp-day_button-height: 34px;
+  --rdp-day_button-width: 34px;
+  --rdp-nav_button-height: 1.75rem;
+  --rdp-nav_button-width: 1.75rem;
+  font-size: 0.875rem;
+}
+
+.rdp-month_caption {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.rdp-weekday {
+  @apply text-xs font-medium text-slate-500;
+}
+
+.rdp-day_button:hover:not([disabled]) {
+  @apply bg-indigo-50;
+}
+
+.rdp-dropdown_root select {
+  @apply rounded-md border border-slate-300 bg-white px-1.5 py-1 text-sm;
+}

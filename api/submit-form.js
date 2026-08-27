@@ -1,9 +1,5 @@
-// api/submit-form.js
-// Vercel serverless function to submit form data to FileMaker
+import https from 'https';
 
-const https = require('https');
-
-// Helper function to make HTTPS requests
 function makeRequest(method, hostname, path, auth, data) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -36,7 +32,6 @@ function makeRequest(method, hostname, path, auth, data) {
   });
 }
 
-// Generate UUID v4
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
@@ -46,7 +41,6 @@ function generateUUID() {
 }
 
 export default async function handler(req, res) {
-  // Handle CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');

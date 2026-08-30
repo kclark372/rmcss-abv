@@ -38,7 +38,7 @@ import {
  *
  * When `onComplete` is passed the form hands the new assessment's UUID to its
  * parent instead of rendering a success screen, so the guided flow can move
- * straight on to the handoff step without showing the ID to the participant.
+ * straight on to the meeting form without showing the ID to the participant.
  */
 
 type Answers = Record<RSAQuestionKey, boolean>;

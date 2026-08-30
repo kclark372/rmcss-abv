@@ -79,11 +79,14 @@ export function DatePicker({
   value,
   onChange,
   placeholder = 'Select a date',
+  disableAfterToday = false,
 }: {
   id?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** When set, days after today can't be picked from the calendar. */
+  disableAfterToday?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -118,8 +121,13 @@ export function DatePicker({
             selected={selected}
             defaultMonth={selected}
             captionLayout="dropdown"
+            disabled={disableAfterToday ? { after: new Date() } : undefined}
             startMonth={new Date(new Date().getFullYear() - 2, 0)}
-            endMonth={new Date(new Date().getFullYear() + 2, 11)}
+            endMonth={
+              disableAfterToday
+                ? new Date()
+                : new Date(new Date().getFullYear() + 2, 11)
+            }
             onSelect={(date) => {
               onChange(date ? toISODate(date) : '');
               setIsOpen(false);

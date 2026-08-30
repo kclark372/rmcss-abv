@@ -152,6 +152,26 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
     setStep(1);
   }
 
+  /**
+   * Section 2 (Consequences of Use) doesn't apply when the participant reported
+   * no substance use in section 1, so it's skipped in both directions.
+   */
+  function isSkippedStep(candidate: number): boolean {
+    return candidate === 2 && answers.s1z_none;
+  }
+
+  function goToNextStep(from: number) {
+    let next = from + 1;
+    while (next < LAST_STEP && isSkippedStep(next)) next += 1;
+    setStep(next);
+  }
+
+  function goToPrevStep(from: number) {
+    let prev = from - 1;
+    while (prev > 0 && isSkippedStep(prev)) prev -= 1;
+    setStep(prev);
+  }
+
   async function handleSubmit() {
     setIsSubmitting(true);
     setSubmitError(null);
@@ -294,24 +314,23 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
         </>
       ) : step === LAST_STEP ? (
         <>
-          <Card title="Assessment Complete" description="Ready to submit">
-            <p className="text-sm text-slate-600">
-              All sections of the self-assessment have been completed. Submit to save
-              this assessment to FileMaker.
+          <Card title="Assessment Complete">
+            <p className="text-base font-bold text-slate-900 sm:text-lg">
+              Please give tablet to staff
             </p>
           </Card>
 
           <ButtonRow>
-            <Button variant="secondary" onClick={() => setStep(step - 1)}>
+            <Button variant="secondary" onClick={() => goToPrevStep(step)}>
               Previous
             </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
+            <Button variant="staff" onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Spinner /> Submitting…
                 </>
               ) : (
-                'Submit assessment'
+                'Staff Zone'
               )}
             </Button>
           </ButtonRow>
@@ -322,8 +341,8 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
           sectionIndex={step - 1}
           answers={answers}
           onToggle={toggleAnswer}
-          onPrev={() => setStep(step - 1)}
-          onNext={() => setStep(step + 1)}
+          onPrev={() => goToPrevStep(step)}
+          onNext={() => goToNextStep(step)}
           canGoBack={step > 1}
         />
       )}

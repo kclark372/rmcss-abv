@@ -8,6 +8,8 @@
 
 import { useState, type ReactNode } from 'react';
 
+import type { TalkingPointGroup } from '@/lib/talking-points';
+
 /* -------------------------------------------------------------------------- */
 /* Page chrome                                                                */
 /* -------------------------------------------------------------------------- */
@@ -371,13 +373,10 @@ export function EmptyRecap({ children }: { children: ReactNode }) {
  */
 export function TalkingPoints({
   title,
-  points,
-  subList,
+  groups,
 }: {
   title: string;
-  points: string[];
-  /** A labelled group below the main bullets, e.g. the MI strategies. */
-  subList?: { label: string; points: string[] };
+  groups: readonly TalkingPointGroup[];
 }) {
   const [pinned, setPinned] = useState(false);
 
@@ -396,25 +395,25 @@ export function TalkingPoints({
       </button>
 
       <div className={pinned ? 'block' : 'hidden group-hover:block'}>
-        <ul className="mt-2 space-y-1.5 pl-4">
-          {points.map((point) => (
-            <li key={point} className="list-disc text-sm leading-snug text-amber-900">
-              {point}
-            </li>
-          ))}
-        </ul>
-        {subList ? (
-          <>
-            <p className="mt-3 text-sm font-medium text-amber-900">{subList.label}</p>
-            <ul className="mt-1.5 space-y-1.5 pl-4">
-              {subList.points.map((point) => (
-                <li key={point} className="list-disc text-sm leading-snug text-amber-900">
-                  {point}
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
+        {groups.map((group, groupIndex) => (
+          <div key={groupIndex} className={groupIndex === 0 ? 'mt-2' : 'mt-3'}>
+            {group.label ? (
+              <p className="text-sm font-medium text-amber-900">{group.label}</p>
+            ) : null}
+            {group.items && group.items.length > 0 ? (
+              <ul className={`space-y-1.5 pl-4 ${group.label ? 'mt-1.5' : ''}`}>
+                {group.items.map((item, itemIndex) => (
+                  <li
+                    key={itemIndex}
+                    className="list-disc text-sm leading-snug text-amber-900"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ))}
       </div>
     </div>
   );

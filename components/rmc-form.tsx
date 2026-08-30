@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { lookupRSA, submitRMC } from '@/app/actions/submit-rmc';
 import { DatePicker, TimePicker } from '@/components/date-time';
 import { concatSectionRecap, RSA_SECTIONS } from '@/lib/schemas/rsa-questions';
+import { TALKING_POINTS, type TalkingPointBlock } from '@/lib/talking-points';
 import {
   ALT_OPTIONS,
   GOALS,
@@ -338,24 +339,7 @@ export function RMCForm({
       <RecapSection
         sectionNumber={2}
         rsa={rsa}
-        talkingPoints={{
-          title: '\ud83d\udca1 Talking points for Q1 and Q2',
-          points: [
-            'Can you tell me more about when... (most recent/severe problem)',
-            'It looks like you have been using (substance type/frequency)',
-            'How do you imagine things will be if you continue using?',
-          ],
-          subList: {
-            label: 'Reflect back and use MI strategies:',
-            points: [
-              'Express Empathy',
-              'Develop Discrepancy',
-              'Avoid Argumentation',
-              'Support Self-Efficacy',
-              'Emphasize Autonomy',
-            ],
-          },
-        }}
+        talkingPoints={TALKING_POINTS.q1q2}
         question={{
           label: "Is there any (other) kind of substance use or problems that you've had?",
           value: text.otherProblems_te,
@@ -366,17 +350,7 @@ export function RMCForm({
       <RecapSection
         sectionNumber={3}
         rsa={rsa}
-        talkingPoints={{
-          title: '\ud83d\udca1 Talking points for Q3',
-          points: [
-            'It looks like you were in treatment for your (drug and/or alcohol) use in the past 90 days/ever. Can you tell me how that went for you?',
-            'What things have you liked about treatment?',
-            'What has helped you learn skills for staying off of (drugs or alcohol)?',
-            'What kinds of skills have you learned for coping with problems that come up in your life?',
-            "How has your life gotten better since you've been in treatment?",
-            "What do you like about what you've done?",
-          ],
-        }}
+        talkingPoints={TALKING_POINTS.q3}
         question={{
           label: 'Have you gotten any (other) help with your alcohol or drug use?',
           value: text.helpwithUse_te,
@@ -387,17 +361,7 @@ export function RMCForm({
       <RecapSection
         sectionNumber={4}
         rsa={rsa}
-        talkingPoints={{
-          title: '\ud83d\udca1 Talking points for Q4',
-          points: [
-            "I'm hearing that [X, Y, Z] are bothering you.",
-            "What's bothering you most out of those things?",
-            "What's worrying you the most?",
-            "I'm guessing that (X, Y, Z) problems is bothering you the most.",
-            'What do you feel is most important for you to address right now?',
-            'Tell me more.',
-          ],
-        }}
+        talkingPoints={TALKING_POINTS.q4}
         question={{
           label: 'What is your most important reason (to/you might) consider change?',
           value: text.reasonChange_te,
@@ -408,15 +372,7 @@ export function RMCForm({
       <RecapSection
         sectionNumber={5}
         rsa={rsa}
-        talkingPoints={{
-          title: '\ud83d\udca1 Talking points for Q5',
-          points: [
-            'It sounds like (treatment could help/family wants you in treatment). Tell me more about that.',
-            'What do you think treatment could offer you?',
-            'When you think about going to treatment, what feels most important?',
-            'What would help make treatment feel doable for you?',
-          ],
-        }}
+        talkingPoints={TALKING_POINTS.q5}
         question={{
           label: 'What (other) reasons do you think might be helpful to go to treatment?',
           value: text.reasonTxGo_te,
@@ -427,16 +383,7 @@ export function RMCForm({
       <RecapSection
         sectionNumber={6}
         rsa={rsa}
-        talkingPoints={{
-          title: '\ud83d\udca1 Talking points for Q6',
-          points: [
-            "I'm hearing that (barriers) could get in the way. Let's talk about that.",
-            "What's the biggest hurdle you think you'd face?",
-            'What would need to happen to overcome (specific barrier)?',
-            'Do you have any ideas for how we could address (barrier)?',
-            'What support or resources would help?',
-          ],
-        }}
+        talkingPoints={TALKING_POINTS.q6}
         question={{
           label:
             'What (other) reasons do you think it might be hard to go or stay in treatment or recovery?',
@@ -486,13 +433,8 @@ export function RMCForm({
         <>
           <Card title="Importance">
             <TalkingPoints
-              title="💡 Talking points for Importance"
-              points={[
-                'On a scale of 1-10, where 1 is "not important at all" and 10 is "extremely important," where would you rate this goal?',
-                'What would it take to move from a [X] to a [X+1]?',
-                "What's keeping this from being more important to you right now?",
-                'What benefits do you see in working toward this goal?',
-              ]}
+              title={TALKING_POINTS.importance.title}
+              groups={TALKING_POINTS.importance.groups}
             />
             <div className="mt-5">
               <Ruler
@@ -510,14 +452,8 @@ export function RMCForm({
 
           <Card title="Confidence in Your Ability">
             <TalkingPoints
-              title="💡 Talking points for Confidence"
-              points={[
-                'On a scale of 1-10, where 1 is "not confident at all" and 10 is "completely confident," where would you rate your ability to reach this goal?',
-                'What gives you confidence that you can do this?',
-                'What would help increase your confidence?',
-                "What's worked for you in the past when facing challenges?",
-                'Who or what could support you in achieving this?',
-              ]}
+              title={TALKING_POINTS.confidence.title}
+              groups={TALKING_POINTS.confidence.groups}
             />
             <div className="mt-5">
               <Ruler
@@ -810,7 +746,7 @@ function RecapSection({
   sectionNumber: number;
   rsa: RSAContext;
   concatenated?: boolean;
-  talkingPoints?: { title: string; points: string[]; subList?: { label: string; points: string[] } };
+  talkingPoints?: TalkingPointBlock;
   question?: { label: string; value: string; onChange: (value: string) => void };
 }) {
   const section = RSA_SECTIONS.find((s) => s.number === sectionNumber);
@@ -836,11 +772,7 @@ function RecapSection({
       )}
 
       {talkingPoints ? (
-        <TalkingPoints
-          title={talkingPoints.title}
-          points={talkingPoints.points}
-          subList={talkingPoints.subList}
-        />
+        <TalkingPoints title={talkingPoints.title} groups={talkingPoints.groups} />
       ) : null}
 
       {question ? (

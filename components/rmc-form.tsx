@@ -322,7 +322,7 @@ export function RMCForm({
         <dl className="grid gap-3 sm:grid-cols-2">
           <InfoField label="Participant name" value={rsa.name_legal_full} />
           <InfoField label="Agency" value={rsa.agency} />
-          <InfoField label="Staff member" value={rsa.XSID} />
+          <InfoField label="Staff member" value={rsa.staffName} />
           <InfoField label="RSA date" value={rsa.XADT} />
         </dl>
       </Card>

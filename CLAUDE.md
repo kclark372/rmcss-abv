@@ -35,6 +35,8 @@ Things that will bite you:
 
 - **Field names differ from the old HTML forms.** It is `important`, `confident`
   and `recording` on `abv_RMC` — not `importance`, `confidence`, `record`.
+- **"Your name" (staff) is `name_pref_full_staff`**, not `XSID`, on all three
+  layouts. The code calls it `staffName` internally.
 - **`abv_RSA` has no `s8z_none`.** Section 8 therefore has no "none of these"
   option. Add the field and put it on the layout before adding one.
 - **`discuss_te` must be on the `abv_RSA` layout.** The self-assessment's

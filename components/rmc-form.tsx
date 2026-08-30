@@ -334,6 +334,8 @@ export function RMCForm({
         </dl>
       </Card>
 
+      <Card title="Staff- start recording for CogniTrainer" />
+
       <RecapSection sectionNumber={1} rsa={rsa} />
 
       <RecapSection
@@ -676,6 +678,9 @@ export function RMCForm({
       </Card>
 
       <Card title="Recording">
+        <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+          Staff- stop recording
+        </p>
         <Field label="Did you record this meeting?" htmlFor="recording">
           <Select
             id="recording"

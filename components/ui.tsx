@@ -46,7 +46,7 @@ export function Card({
 }: {
   title?: string;
   description?: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <section className="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -56,7 +56,9 @@ export function Card({
       {description ? (
         <p className="mt-1 text-sm text-slate-600">{description}</p>
       ) : null}
-      <div className={title || description ? 'mt-4' : ''}>{children}</div>
+      {children ? (
+        <div className={title || description ? 'mt-4' : ''}>{children}</div>
+      ) : null}
     </section>
   );
 }

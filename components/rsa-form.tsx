@@ -63,6 +63,13 @@ const EMPTY_STAFF_ENTRY: StaffEntry = {
   XADT: '',
 };
 
+/** Today's date as `YYYY-MM-DD` in the browser's timezone. */
+function todayISODate(): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
 export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void }) {
   const [step, setStep] = useState(0);
   const [entry, setEntry] = useState<StaffEntry>(EMPTY_STAFF_ENTRY);
@@ -76,10 +83,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
 
   // Default the assessment date to today, in the browser's timezone.
   useEffect(() => {
-    const today = new Date();
-    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(
-      today.getDate(),
-    ).padStart(2, '0')}`;
+    const iso = todayISODate();
     setEntry((prev) => (prev.XADT ? prev : { ...prev, XADT: iso }));
   }, []);
 
@@ -135,7 +139,11 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
     if (!entry.name_legal_full.trim()) {
       found.name_legal_full = 'Participant name is required';
     }
-    if (!entry.XADT) found.XADT = 'Assessment date is required';
+    if (!entry.XADT) {
+      found.XADT = 'Assessment date is required';
+    } else if (entry.XADT > todayISODate()) {
+      found.XADT = 'Cannot select a future date';
+    }
 
     setErrors(found);
     if (Object.keys(found).length > 0) return;
@@ -259,7 +267,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
                 id="name_legal_full"
                 value={entry.name_legal_full}
                 invalid={Boolean(errors.name_legal_full)}
-                placeholder="Enter participant's legal name"
+                placeholder="Participant first name"
                 onChange={(value) => updateEntry('name_legal_full', value)}
               />
             </Field>
@@ -268,6 +276,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
               <DatePicker
                 id="XADT"
                 value={entry.XADT}
+                disableAfterToday
                 onChange={(value) => updateEntry('XADT', value)}
               />
             </Field>

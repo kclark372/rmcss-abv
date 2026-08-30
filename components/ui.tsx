@@ -297,7 +297,7 @@ export function Button({
 }) {
   const variants = {
     primary:
-      'bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:ring-indigo-500 disabled:bg-indigo-300',
+      'bg-[#799CAC] text-white hover:bg-[#63808d] focus-visible:ring-[#799CAC] disabled:bg-[#b3c8d0]',
     secondary:
       'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-400 disabled:text-slate-400',
   } as const;

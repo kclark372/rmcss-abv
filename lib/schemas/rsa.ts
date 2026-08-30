@@ -24,7 +24,11 @@ export const rsaSubmissionSchema = z
     /** `XADT` is a text field on abv_RSA, so the ISO value is stored as-is. */
     XADT: z
       .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Assessment date is required'),
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Assessment date is required')
+      .refine(
+        (value) => value <= new Date().toISOString().slice(0, 10),
+        'Cannot select a future date',
+      ),
     /** ISO timestamp captured when the participant started the assessment. */
     timestamp_beginRSA: z.string().datetime({ offset: true }).nullable(),
   })

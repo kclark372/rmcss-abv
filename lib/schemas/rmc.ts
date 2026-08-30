@@ -186,7 +186,8 @@ export interface RSAContext {
   uuid: string;
   name_legal_full: string;
   agency: string;
-  XSID: string;
+  /** "Your name" (staff). From FileMaker `name_pref_full_staff`. */
+  staffName: string;
   /** `XADT` from abv_RSA — the assessment date, ISO `YYYY-MM-DD`. */
   XADT: string;
   discuss_te: string;

@@ -54,14 +54,15 @@ const LAST_STEP = RSA_SECTIONS.length + 2; // 10 — "Assessment Complete" / sub
 
 interface StaffEntry {
   agency: string;
-  XSID: string;
+  /** "Your name" — the staff member. Maps to FileMaker `name_pref_full_staff`. */
+  staffName: string;
   name_legal_full: string;
   XADT: string;
 }
 
 const EMPTY_STAFF_ENTRY: StaffEntry = {
   agency: '',
-  XSID: '',
+  staffName: '',
   name_legal_full: '',
   XADT: '',
 };
@@ -139,7 +140,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
   function beginAssessment() {
     const found: Record<string, string> = {};
     if (!entry.agency) found.agency = 'Organization is required';
-    if (!entry.XSID) found.XSID = 'Your name is required';
+    if (!entry.staffName) found.staffName = 'Your name is required';
     if (!entry.name_legal_full.trim()) {
       found.name_legal_full = 'Participant name is required';
     }
@@ -270,20 +271,20 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
                 options={AGENCIES.map((a) => ({ value: a, label: a }))}
                 onChange={(value) => {
                   updateEntry('agency', value);
-                  updateEntry('XSID', '');
+                  updateEntry('staffName', '');
                 }}
               />
             </Field>
 
             {entry.agency ? (
-              <Field label="Your name" htmlFor="XSID" required error={errors.XSID}>
+              <Field label="Your name" htmlFor="staffName" required error={errors.staffName}>
                 <Select
-                  id="XSID"
-                  value={entry.XSID}
-                  invalid={Boolean(errors.XSID)}
+                  id="staffName"
+                  value={entry.staffName}
+                  invalid={Boolean(errors.staffName)}
                   placeholder="Select your name"
                   options={staffOptions}
-                  onChange={(value) => updateEntry('XSID', value)}
+                  onChange={(value) => updateEntry('staffName', value)}
                 />
               </Field>
             ) : null}

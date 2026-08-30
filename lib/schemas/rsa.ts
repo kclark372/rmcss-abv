@@ -19,7 +19,8 @@ const answers = z.object(
 export const rsaSubmissionSchema = z
   .object({
     agency: z.enum(AGENCIES, { message: 'Organization is required' }),
-    XSID: z.string().trim().min(1, 'Your name is required'),
+    /** "Your name" (staff). Stored in FileMaker `name_pref_full_staff`. */
+    staffName: z.string().trim().min(1, 'Your name is required'),
     name_legal_full: z.string().trim().min(1, "Participant name is required").max(255),
     /** `XADT` is a text field on abv_RSA, so the ISO value is stored as-is. */
     XADT: z

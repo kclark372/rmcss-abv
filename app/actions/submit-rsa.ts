@@ -30,7 +30,8 @@ export async function submitRSA(input: unknown): Promise<RSASubmitResult> {
   const fieldData: FMFieldData = {
     __UUID: uuid,
     agency: data.agency,
-    XSID: data.XSID,
+    // "Your name" (the staff member) is stored in name_pref_full_staff.
+    name_pref_full_staff: data.staffName,
     name_legal_full: data.name_legal_full,
     // XADT is a text field on abv_RSA, so the ISO date is stored verbatim.
     XADT: data.XADT,

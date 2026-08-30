@@ -90,7 +90,7 @@ export async function submitRMC(input: unknown): Promise<RMCSubmitResult> {
         // Identity carried forward from the assessment.
         name_legal_full: rsa.name_legal_full,
         agency: rsa.agency,
-        XSID: rsa.XSID,
+        name_pref_full_staff: rsa.staffName,
 
         // date_RSA and date_RMC are true date fields, so MM/DD/YYYY.
         date_RSA: toFMDate(rsa.XADT),
@@ -142,7 +142,7 @@ export async function submitRMC(input: unknown): Promise<RMCSubmitResult> {
 
           name_legal_full: rsa.name_legal_full,
           agency: rsa.agency,
-          XSID: rsa.XSID,
+          name_pref_full_staff: rsa.staffName,
 
           ref_other_te: data.ref_other_te,
           // ref_agency / ref_agency_details are the newer pair on abv_tx;
@@ -207,7 +207,7 @@ function toRSAContext(fields: Record<string, string>, fallbackUuid: string): RSA
     uuid: fields.__UUID ?? fallbackUuid,
     name_legal_full: fields.name_legal_full ?? '',
     agency: fields.agency ?? '',
-    XSID: fields.XSID ?? '',
+    staffName: fields.name_pref_full_staff ?? '',
     XADT: fields.XADT ?? '',
     discuss_te: fields.discuss_te ?? '',
     answers,

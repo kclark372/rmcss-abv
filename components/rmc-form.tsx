@@ -695,6 +695,7 @@ export function RMCForm({
             <DatePicker
               id="recording_upload_date"
               value={text.recording_upload_date}
+              disableAfterToday
               onChange={(value) => setField('recording_upload_date', value)}
             />
           </Field>

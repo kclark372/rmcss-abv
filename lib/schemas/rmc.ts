@@ -114,6 +114,11 @@ const optionalDate = z
   .string()
   .regex(/^(\d{4}-\d{2}-\d{2})?$/, 'Use a valid date')
   .default('');
+/** Like `optionalDate`, but the date can't be in the future. */
+const optionalPastDate = optionalDate.refine(
+  (value) => !value || value <= new Date().toISOString().slice(0, 10),
+  'Cannot select a future date',
+);
 const optionalTime = z
   .string()
   .regex(/^(\d{2}:\d{2}(:\d{2})?)?$/, 'Use a valid time')
@@ -153,7 +158,7 @@ export const rmcSubmissionSchema = z
 
     /** Recording. Stored in `recording`. */
     recording: z.enum(['yes', 'no']).or(z.literal('')).default(''),
-    recording_upload_date: optionalDate,
+    recording_upload_date: optionalPastDate,
     recording_reason: optionalText,
 
     wantReferral: z.enum(['yes', 'no']).or(z.literal('')).default(''),

@@ -38,7 +38,7 @@ export const ALT_OPTIONS = [
   { key: 'alt_sponsor', label: 'Get a sponsor' },
   { key: 'alt_reconnect', label: 'Re-connect with sober family and friends' },
   { key: 'alt_job', label: 'Look for a job' },
-  { key: 'alt_faith', label: 'Attend church/synagogue/mosque/temple/faith-based programs' },
+  { key: 'alt_faith', label: 'Attend faith-based program (e.g., church, synagogue, mosque, temple, etc.)' },
   { key: 'alt_school', label: 'Attend school' },
   { key: 'alt_reduce', label: 'Reduce use' },
   { key: 'alt_ssp', label: 'Use syringe exchange/overdose prevention services' },

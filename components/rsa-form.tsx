@@ -193,7 +193,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
   if (submittedUuid) {
     return (
       <PageShell>
-        <PageHeader title="RMCSS Self-Assessment" />
+        <PageHeader title="Self-Assessment" />
         <Card>
           <Alert tone="success" title="Assessment submitted">
             The participant&rsquo;s self-assessment has been recorded in FileMaker.
@@ -219,9 +219,14 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
         ? 'Complete'
         : `${Math.round(progress)}% complete`;
 
+  // Step 0 is the staff/participant intake for the whole checkup; every step
+  // after it is the participant's self-assessment.
+  const headerTitle =
+    step === 0 ? 'Recovery Management Checkup' : 'Self-Assessment';
+
   return (
     <PageShell>
-      <PageHeader title="RMCSS Self-Assessment" />
+      <PageHeader title={headerTitle} />
 
       {submitError ? <Alert title="Could not submit">{submitError}</Alert> : null}
 
@@ -313,6 +318,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
         </>
       ) : (
         <SectionStep
+          key={step}
           sectionIndex={step - 1}
           answers={answers}
           onToggle={toggleAnswer}
@@ -341,13 +347,26 @@ function SectionStep({
   canGoBack: boolean;
 }) {
   const section = RSA_SECTIONS[sectionIndex];
+  const [error, setError] = useState<string | null>(null);
+
+  const answered = section.questions.some((question) => answers[question.key]);
+
+  // Clear the "pick one" warning as soon as they check something.
+  useEffect(() => {
+    if (answered) setError(null);
+  }, [answered]);
+
+  function handleNext() {
+    if (!answered) {
+      setError('Select at least one option to continue.');
+      return;
+    }
+    onNext();
+  }
 
   return (
     <>
-      <Card
-        title={`${section.number}. ${section.title}`}
-        description={section.intro}
-      >
+      <Card title={section.title} description={section.intro}>
         <CheckboxGrid>
           {section.questions.map((question) => (
             <CheckboxRow
@@ -359,6 +378,9 @@ function SectionStep({
             />
           ))}
         </CheckboxGrid>
+        {error ? (
+          <p className="mt-4 text-sm font-medium text-red-600">{error}</p>
+        ) : null}
       </Card>
 
       <ButtonRow>
@@ -369,7 +391,7 @@ function SectionStep({
         ) : (
           <span />
         )}
-        <Button onClick={onNext}>Next</Button>
+        <Button onClick={handleNext}>Next</Button>
       </ButtonRow>
     </>
   );

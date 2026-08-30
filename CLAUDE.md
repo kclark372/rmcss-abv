@@ -6,9 +6,10 @@ Next.js app with two public forms that create records in the FileMaker file
 ## Shape
 
 - `app/page.tsx` — the whole checkup. `components/assessment-flow.tsx` runs it as
-  a four-step state machine: assessment → handoff → meeting → done. The
-  assessment UUID linking the two records is held in memory and never shown,
-  typed, or put in the URL.
+  a three-step state machine: assessment → meeting → done. Pressing "Staff Zone"
+  on the assessment's last step saves the RSA record and goes straight to the
+  meeting. The assessment UUID linking the two records is held in memory and
+  never shown, typed, or put in the URL.
 - `app/rmc/page.tsx` — the meeting form on its own, for picking a meeting up
   later by assessment ID.
 - `app/actions/*.ts` — the only code that talks to FileMaker. Server actions, so
@@ -36,6 +37,10 @@ Things that will bite you:
   and `recording` on `abv_RMC` — not `importance`, `confidence`, `record`.
 - **`abv_RSA` has no `s8z_none`.** Section 8 therefore has no "none of these"
   option. Add the field and put it on the layout before adding one.
+- **`discuss_te` must be on the `abv_RSA` layout.** The self-assessment's
+  "anything else you'd like to discuss?" step writes it; the RMC form reads it
+  back and also copies it to `abv_RMC::RSA_discuss_te`. If it is not on the
+  `abv_RSA` layout, every RSA create fails with error 102.
 - **`abv_tx::__UUID` has no auto-enter**, unlike the other two, so the server
   action supplies it.
 - **`abv_tx` has two agency pairs.** This app writes the newer `ref_agency` /

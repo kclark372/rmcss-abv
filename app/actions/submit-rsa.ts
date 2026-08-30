@@ -34,6 +34,9 @@ export async function submitRSA(input: unknown): Promise<RSASubmitResult> {
     name_legal_full: data.name_legal_full,
     // XADT is a text field on abv_RSA, so the ISO date is stored verbatim.
     XADT: data.XADT,
+    // Free-text "anything else you'd like to discuss?" — must be on the
+    // abv_RSA layout or FileMaker rejects the whole create with error 102.
+    discuss_te: data.discuss_te,
     timestamp_beginRSA: data.timestamp_beginRSA
       ? toFMTimestamp(new Date(data.timestamp_beginRSA))
       : '',

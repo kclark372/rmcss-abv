@@ -26,6 +26,7 @@ import {
   ProgressBar,
   Select,
   Spinner,
+  TextArea,
   TextInput,
 } from '@/components/ui';
 
@@ -33,8 +34,9 @@ import {
  * The RSA self-assessment.
  *
  * Step 0 collects staff and participant details, steps 1-8 are the question
- * sections, and step 9 submits. Answers post to a server action; the browser
- * never sees FileMaker credentials.
+ * sections, step 9 is the free-text "anything else" prompt, and step 10
+ * submits. Answers post to a server action; the browser never sees FileMaker
+ * credentials.
  *
  * When `onComplete` is passed the form hands the new assessment's UUID to its
  * parent instead of rendering a success screen, so the guided flow can move
@@ -47,7 +49,8 @@ const EMPTY_ANSWERS = Object.fromEntries(
   RSA_QUESTION_KEYS.map((key) => [key, false]),
 ) as Answers;
 
-const LAST_STEP = RSA_SECTIONS.length + 1; // 9
+const DISCUSS_STEP = RSA_SECTIONS.length + 1; // 9 — the "anything else" prompt
+const LAST_STEP = RSA_SECTIONS.length + 2; // 10 — "Assessment Complete" / submit
 
 interface StaffEntry {
   agency: string;
@@ -74,6 +77,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
   const [step, setStep] = useState(0);
   const [entry, setEntry] = useState<StaffEntry>(EMPTY_STAFF_ENTRY);
   const [answers, setAnswers] = useState<Answers>(EMPTY_ANSWERS);
+  const [discuss, setDiscuss] = useState('');
   const [beganAt, setBeganAt] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -180,6 +184,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
       const result = await submitRSA({
         ...entry,
         timestamp_beginRSA: beganAt,
+        discuss_te: discuss,
         ...answers,
       });
 
@@ -203,6 +208,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
     setSubmittedUuid(null);
     setSubmitError(null);
     setAnswers(EMPTY_ANSWERS);
+    setDiscuss('');
     setBeganAt(null);
     setStep(0);
     setEntry((prev) => ({ ...EMPTY_STAFF_ENTRY, XADT: prev.XADT }));
@@ -310,6 +316,25 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
           <ButtonRow>
             <span />
             <Button onClick={beginAssessment}>Begin self-assessment</Button>
+          </ButtonRow>
+        </>
+      ) : step === DISCUSS_STEP ? (
+        <>
+          <Card title="Anything else you'd like to discuss?">
+            <TextArea
+              id="discuss_te"
+              rows={6}
+              value={discuss}
+              placeholder="Type anything else you'd like to talk about…"
+              onChange={setDiscuss}
+            />
+          </Card>
+
+          <ButtonRow>
+            <Button variant="secondary" onClick={() => goToPrevStep(step)}>
+              Previous
+            </Button>
+            <Button onClick={() => goToNextStep(step)}>Next</Button>
           </ButtonRow>
         </>
       ) : step === LAST_STEP ? (

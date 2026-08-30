@@ -251,7 +251,7 @@ export function RMCForm({
   if (result) {
     return (
       <PageShell>
-        <PageHeader title="RMC Meeting Form" />
+        <PageHeader title="RMC Meeting" />
         <Card>
           <Alert tone="success" title="Meeting recorded">
             The RMC meeting has been saved to FileMaker
@@ -274,7 +274,7 @@ export function RMCForm({
     return (
       <PageShell>
         <PageHeader
-          title="RMC Meeting Form"
+          title="RMC Meeting"
           subtitle="Open a participant's self-assessment to begin the meeting."
         />
         {lookupError ? <Alert title="Not found">{lookupError}</Alert> : null}
@@ -314,7 +314,7 @@ export function RMCForm({
 
   return (
     <PageShell>
-      <PageHeader title="RMC Meeting Form" />
+      <PageHeader title="RMC Meeting" />
 
       {submitError ? <Alert title="Could not submit">{submitError}</Alert> : null}
 
@@ -441,6 +441,14 @@ export function RMCForm({
 
       <RecapSection sectionNumber={7} rsa={rsa} concatenated />
       <RecapSection sectionNumber={8} rsa={rsa} concatenated />
+
+      <Card title="Other topics to discuss">
+        {rsa.discuss_te.trim() ? (
+          <ConcatenatedField value={rsa.discuss_te} />
+        ) : (
+          <EmptyRecap>No topics shared in the self-assessment</EmptyRecap>
+        )}
+      </Card>
 
       <Card title="Goal Setting">
         <Field

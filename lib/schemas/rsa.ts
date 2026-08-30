@@ -29,6 +29,8 @@ export const rsaSubmissionSchema = z
         (value) => value <= new Date().toISOString().slice(0, 10),
         'Cannot select a future date',
       ),
+    /** Free-text "anything else you'd like to discuss?" — optional. */
+    discuss_te: z.string().trim().max(5000).default(''),
     /** ISO timestamp captured when the participant started the assessment. */
     timestamp_beginRSA: z.string().datetime({ offset: true }).nullable(),
   })

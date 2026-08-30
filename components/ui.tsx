@@ -6,7 +6,7 @@
  * form.
  */
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 /* -------------------------------------------------------------------------- */
 /* Page chrome                                                                */
@@ -363,7 +363,12 @@ export function EmptyRecap({ children }: { children: ReactNode }) {
   return <p className="text-sm italic text-slate-500">{children}</p>;
 }
 
-/** Collapsible motivational-interviewing prompts for staff. */
+/**
+ * Motivational-interviewing prompts for staff.
+ *
+ * Reveals on hover; on touch (or by keyboard), tapping the header pins it open
+ * until tapped again.
+ */
 export function TalkingPoints({
   title,
   points,
@@ -374,31 +379,44 @@ export function TalkingPoints({
   /** A labelled group below the main bullets, e.g. the MI strategies. */
   subList?: { label: string; points: string[] };
 }) {
+  const [pinned, setPinned] = useState(false);
+
   return (
-    <details className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
-      <summary className="cursor-pointer text-sm font-medium text-amber-900 marker:text-amber-500">
-        {title}
-      </summary>
-      <ul className="mt-2 space-y-1.5 pl-4">
-        {points.map((point) => (
-          <li key={point} className="list-disc text-sm leading-snug text-amber-900">
-            {point}
-          </li>
-        ))}
-      </ul>
-      {subList ? (
-        <>
-          <p className="mt-3 text-sm font-medium text-amber-900">{subList.label}</p>
-          <ul className="mt-1.5 space-y-1.5 pl-4">
-            {subList.points.map((point) => (
-              <li key={point} className="list-disc text-sm leading-snug text-amber-900">
-                {point}
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-    </details>
+    <div className="group mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+      <button
+        type="button"
+        onClick={() => setPinned((open) => !open)}
+        aria-expanded={pinned}
+        className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium text-amber-900"
+      >
+        <span>{title}</span>
+        <span aria-hidden className="shrink-0 text-xs font-normal text-amber-500">
+          {pinned ? 'tap to hide' : 'hover or tap'}
+        </span>
+      </button>
+
+      <div className={pinned ? 'block' : 'hidden group-hover:block'}>
+        <ul className="mt-2 space-y-1.5 pl-4">
+          {points.map((point) => (
+            <li key={point} className="list-disc text-sm leading-snug text-amber-900">
+              {point}
+            </li>
+          ))}
+        </ul>
+        {subList ? (
+          <>
+            <p className="mt-3 text-sm font-medium text-amber-900">{subList.label}</p>
+            <ul className="mt-1.5 space-y-1.5 pl-4">
+              {subList.points.map((point) => (
+                <li key={point} className="list-disc text-sm leading-snug text-amber-900">
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+      </div>
+    </div>
   );
 }
 

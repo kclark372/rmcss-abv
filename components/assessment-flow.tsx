@@ -55,7 +55,7 @@ function Finished({ onRestart }: { onRestart: () => void }) {
         </p>
         <ButtonRow>
           <span />
-          <Button onClick={onRestart}>New self-assessment</Button>
+          <Button onClick={onRestart}>New RMC Meeting</Button>
         </ButtonRow>
       </Card>
     </PageShell>

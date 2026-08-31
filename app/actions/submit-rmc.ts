@@ -9,7 +9,7 @@ import {
   toFMBool,
   toFMDate,
   toFMDateFromDate,
-  toFMTimeFromDate,
+  toFMTime,
 } from '@/lib/fm/format';
 import { concatSectionRecap, RSA_QUESTION_KEYS } from '@/lib/schemas/rsa-questions';
 import {
@@ -95,12 +95,15 @@ export async function submitRMC(input: unknown): Promise<RMCSubmitResult> {
         // date_RSA and date_RMC are true date fields, so MM/DD/YYYY.
         date_RSA: toFMDate(rsa.XADT),
         date_RMC: toFMDateFromDate(now),
-        time_RMC_begin: toFMTimeFromDate(now),
-        time_RMC_end: toFMTimeFromDate(now),
+        // time_RMC_begin / time_RMC_end are true time fields, staff-entered
+        // as HH:MM and stored as HH:MM:SS. Blank if not filled in.
+        time_RMC_begin: toFMTime(data.time_RMC_begin),
+        time_RMC_end: toFMTime(data.time_RMC_end),
 
         legalStatus: concatSectionRecap(rsa.answers, 7),
         housingStatus: concatSectionRecap(rsa.answers, 8),
         RSA_discuss_te: rsa.discuss_te,
+        lm_ptStatus: data.lm_ptStatus,
 
         otherProblems_te: data.otherProblems_te,
         helpwithUse_te: data.helpwithUse_te,

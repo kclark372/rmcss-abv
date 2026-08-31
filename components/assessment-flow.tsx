@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { RMCForm } from '@/components/rmc-form';
 import { RSAForm } from '@/components/rsa-form';
-import { Alert, Button, ButtonRow, Card, PageHeader, PageShell } from '@/components/ui';
+import { Button, ButtonRow, Card, PageHeader, PageShell } from '@/components/ui';
 
 /**
  * The full checkup on one device, start to finish.
@@ -48,14 +48,14 @@ export function AssessmentFlow() {
 function Finished({ onRestart }: { onRestart: () => void }) {
   return (
     <PageShell>
-      <PageHeader title="Checkup complete" />
+      <PageHeader title="RMC Meeting Saved" />
       <Card>
-        <Alert tone="success" title="Saved to FileMaker">
-          The self-assessment and the meeting have both been recorded.
-        </Alert>
+        <p className="text-base font-bold text-slate-900 sm:text-lg">
+          Provide participant payment
+        </p>
         <ButtonRow>
           <span />
-          <Button onClick={onRestart}>Start a new checkup</Button>
+          <Button onClick={onRestart}>New self-assessment</Button>
         </ButtonRow>
       </Card>
     </PageShell>

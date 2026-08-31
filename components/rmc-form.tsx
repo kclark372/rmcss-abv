@@ -151,11 +151,12 @@ export function RMCForm({
 
   const [text, setText] = useState<FormValues>(EMPTY_VALUES);
   const [flags, setFlags] = useState<Flags>(EMPTY_FLAGS);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [important, setImportant] = useState<number | null>(null);
-  const [confident, setConfident] = useState<number | null>(null);
+  const [important, setImportantValue] = useState<number | null>(null);
+  const [confident, setConfidentValue] = useState<number | null>(null);
 
   const [result, setResult] = useState<{ uuid: string; treatmentUuid: string | null } | null>(
     null,
@@ -189,12 +190,101 @@ export function RMCForm({
     };
   }, [rsaUuid]);
 
+  function clearError(key: string) {
+    setErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }
+
   function setField<K extends keyof FormValues>(key: K, value: string) {
     setText((prev) => ({ ...prev, [key]: value }));
+    clearError(key);
+  }
+
+  function setImportant(value: number) {
+    setImportantValue(value);
+    clearError('important');
+  }
+
+  function setConfident(value: number) {
+    setConfidentValue(value);
+    clearError('confident');
   }
 
   function toggleFlag(key: ReferralTypeKey | AltOptionKey) {
     setFlags((prev) => ({ ...prev, [key]: !prev[key] }));
+    clearError('refTypes');
+    clearError('altOptions');
+  }
+
+  /**
+   * Every question shown on the form is required. Walks the fields that are
+   * currently on screen and returns whether they are all answered.
+   */
+  function validate(): boolean {
+    const found: Record<string, string> = {};
+    const filled = (value: string) => value.trim().length > 0;
+    const need = (key: string, ok: boolean, message = 'This question is required') => {
+      if (!ok) found[key] = message;
+    };
+
+    need('time_RMC_begin', filled(text.time_RMC_begin), 'Enter a time');
+    need('otherProblems_te', filled(text.otherProblems_te));
+    need('helpwithUse_te', filled(text.helpwithUse_te));
+    need('reasonChange_te', filled(text.reasonChange_te));
+    need('reasonTxGo_te', filled(text.reasonTxGo_te));
+    need('reason_TxStay_te', filled(text.reason_TxStay_te));
+
+    need('goal', filled(text.goal), 'Select a goal');
+    if (text.goal === 'other') need('goal_te', filled(text.goal_te));
+
+    if (goalPhrase) {
+      need('important', important !== null, 'Pick a number');
+      need('confident', confident !== null, 'Pick a number');
+    }
+
+    need('wantReferral', filled(text.wantReferral), 'Select an option');
+
+    if (text.wantReferral === 'yes') {
+      need('refTypes', REFERRAL_TYPES.some((t) => flags[t.key]), 'Select at least one');
+      if (flags.ref_other) need('ref_other_te', filled(text.ref_other_te));
+      need('ref_agency', filled(text.ref_agency), 'Select an agency');
+      if (text.ref_agency === 'Other') need('agency_other', filled(text.agency_other));
+      need('ref_agency_details', filled(text.ref_agency_details));
+      need('intake_date', filled(text.intake_date), 'Pick a date');
+      need('intake_time', filled(text.intake_time), 'Enter a time');
+      need('transport', filled(text.transport), 'Select a method');
+      if (text.transport === 'other') {
+        need('transportOther_te', filled(text.transportOther_te));
+      }
+      if (TRANSPORT_NEEDING_PICKUP.includes(text.transport)) {
+        need('travel_date', filled(text.travel_date), 'Pick a date');
+        need('travel_time', filled(text.travel_time), 'Enter a time');
+        need('travel_addy', filled(text.travel_addy));
+        need('travel_phone', filled(text.travel_phone));
+        need('travel_return', filled(text.travel_return));
+        need('travel_notes', filled(text.travel_notes));
+      }
+    }
+
+    if (text.wantReferral === 'no') {
+      need('altOptions', ALT_OPTIONS.some((o) => flags[o.key]), 'Select at least one');
+      if (flags.alt_other) need('alt_other_te', filled(text.alt_other_te));
+    }
+
+    need('lm_ptStatus', filled(text.lm_ptStatus), 'Select a status');
+    need('recording', filled(text.recording), 'Select an option');
+    if (text.recording === 'yes') {
+      need('recording_upload_date', filled(text.recording_upload_date), 'Pick a date');
+    }
+    if (text.recording === 'no') need('recording_reason', filled(text.recording_reason));
+    need('time_RMC_end', filled(text.time_RMC_end), 'Enter a time');
+
+    setErrors(found);
+    return Object.keys(found).length === 0;
   }
 
   async function handleLookup() {
@@ -217,6 +307,13 @@ export function RMCForm({
 
   async function handleSubmit() {
     if (!rsa) return;
+
+    if (!validate()) {
+      setSubmitError('Please answer every question before saving.');
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -254,12 +351,13 @@ export function RMCForm({
   function startNewMeeting() {
     setResult(null);
     setSubmitError(null);
+    setErrors({});
     setRsa(null);
     setLookupId('');
     setText(EMPTY_VALUES);
     setFlags(EMPTY_FLAGS);
-    setImportant(null);
-    setConfident(null);
+    setImportantValue(null);
+    setConfidentValue(null);
   }
 
   if (result) {
@@ -342,7 +440,12 @@ export function RMCForm({
       </Card>
 
       <Card title="Staff- start recording for CogniTrainer">
-        <Field label="Meeting start time:" htmlFor="time_RMC_begin">
+        <Field
+          label="Meeting start time:"
+          htmlFor="time_RMC_begin"
+          required
+          error={errors.time_RMC_begin}
+        >
           <TimePicker
             id="time_RMC_begin"
             value={text.time_RMC_begin}
@@ -360,6 +463,7 @@ export function RMCForm({
         question={{
           label: "Is there any (other) kind of substance use or problems that you've had?",
           value: text.otherProblems_te,
+          error: errors.otherProblems_te,
           onChange: (value) => setField('otherProblems_te', value),
         }}
       />
@@ -371,6 +475,7 @@ export function RMCForm({
         question={{
           label: 'Have you gotten any (other) help with your alcohol or drug use?',
           value: text.helpwithUse_te,
+          error: errors.helpwithUse_te,
           onChange: (value) => setField('helpwithUse_te', value),
         }}
       />
@@ -382,6 +487,7 @@ export function RMCForm({
         question={{
           label: 'What is your most important reason (to/you might) consider change?',
           value: text.reasonChange_te,
+          error: errors.reasonChange_te,
           onChange: (value) => setField('reasonChange_te', value),
         }}
       />
@@ -393,6 +499,7 @@ export function RMCForm({
         question={{
           label: 'What (other) reasons do you think might be helpful to go to treatment?',
           value: text.reasonTxGo_te,
+          error: errors.reasonTxGo_te,
           onChange: (value) => setField('reasonTxGo_te', value),
         }}
       />
@@ -405,6 +512,7 @@ export function RMCForm({
           label:
             'What (other) reasons do you think it might be hard to go or stay in treatment or recovery?',
           value: text.reason_TxStay_te,
+          error: errors.reason_TxStay_te,
           onChange: (value) => setField('reason_TxStay_te', value),
         }}
       />
@@ -424,10 +532,13 @@ export function RMCForm({
         <Field
           label="From talking today, which of these sounds like the best goal for the next 90 days?"
           htmlFor="goal"
+          required
+          error={errors.goal}
         >
           <Select
             id="goal"
             value={text.goal}
+            invalid={Boolean(errors.goal)}
             placeholder="Select a goal"
             options={GOALS.map((g) => ({ value: g.value, label: g.label }))}
             onChange={(value) => setField('goal', value)}
@@ -435,10 +546,11 @@ export function RMCForm({
         </Field>
 
         {text.goal === 'other' ? (
-          <Field label="Please specify" htmlFor="goal_te">
+          <Field label="Please specify" htmlFor="goal_te" required error={errors.goal_te}>
             <TextInput
               id="goal_te"
               value={text.goal_te}
+              invalid={Boolean(errors.goal_te)}
               placeholder="Enter other goal…"
               onChange={(value) => setField('goal_te', value)}
             />
@@ -460,10 +572,14 @@ export function RMCForm({
                 onChange={setImportant}
                 question={
                   <>
-                    How important is it for you to <strong>{goalPhrase}</strong>?
+                    How important is it for you to <strong>{goalPhrase}</strong>?{' '}
+                    <span className="text-red-600">*</span>
                   </>
                 }
               />
+              {errors.important ? (
+                <p className="mt-2 text-xs font-medium text-red-600">{errors.important}</p>
+              ) : null}
             </div>
           </Card>
 
@@ -479,10 +595,14 @@ export function RMCForm({
                 onChange={setConfident}
                 question={
                   <>
-                    How confident are you that you can <strong>{goalPhrase}</strong>?
+                    How confident are you that you can <strong>{goalPhrase}</strong>?{' '}
+                    <span className="text-red-600">*</span>
                   </>
                 }
               />
+              {errors.confident ? (
+                <p className="mt-2 text-xs font-medium text-red-600">{errors.confident}</p>
+              ) : null}
             </div>
           </Card>
         </>
@@ -492,10 +612,13 @@ export function RMCForm({
         <Field
           label="Does the person want help with a referral to (a different) SUD treatment program?"
           htmlFor="wantReferral"
+          required
+          error={errors.wantReferral}
         >
           <Select
             id="wantReferral"
             value={text.wantReferral}
+            invalid={Boolean(errors.wantReferral)}
             options={YES_NO}
             onChange={(value) => setField('wantReferral', value)}
           />
@@ -503,7 +626,11 @@ export function RMCForm({
 
         {wantsReferral ? (
           <>
-            <Field label="What types of treatment or medication would you like? (Check all that apply)">
+            <Field
+              label="What types of treatment or medication would you like? (Check all that apply)"
+              required
+              error={errors.refTypes}
+            >
               <CheckboxGrid columns={2}>
                 {REFERRAL_TYPES.map((type) => (
                   <CheckboxRow
@@ -518,10 +645,11 @@ export function RMCForm({
             </Field>
 
             {flags.ref_other ? (
-              <Field label="Please specify" htmlFor="ref_other_te">
+              <Field label="Please specify" htmlFor="ref_other_te" required error={errors.ref_other_te}>
                 <TextInput
                   id="ref_other_te"
                   value={text.ref_other_te}
+                  invalid={Boolean(errors.ref_other_te)}
                   placeholder="Enter other treatment type…"
                   onChange={(value) => setField('ref_other_te', value)}
                 />
@@ -531,11 +659,14 @@ export function RMCForm({
             <Field
               label="Initial referral agency"
               htmlFor="ref_agency"
+              required
+              error={errors.ref_agency}
               hint="If you need more resources, search by ZIP code at screen4success.org/resources"
             >
               <Select
                 id="ref_agency"
                 value={text.ref_agency}
+                invalid={Boolean(errors.ref_agency)}
                 placeholder="Select an agency"
                 options={REFERRAL_AGENCIES.map((a) => ({ value: a, label: a }))}
                 onChange={(value) => setField('ref_agency', value)}
@@ -543,10 +674,16 @@ export function RMCForm({
             </Field>
 
             {text.ref_agency === 'Other' ? (
-              <Field label="Please specify agency name" htmlFor="agency_other">
+              <Field
+                label="Please specify agency name"
+                htmlFor="agency_other"
+                required
+                error={errors.agency_other}
+              >
                 <TextInput
                   id="agency_other"
                   value={text.agency_other}
+                  invalid={Boolean(errors.agency_other)}
                   placeholder="Enter agency name…"
                   onChange={(value) => setField('agency_other', value)}
                 />
@@ -556,24 +693,27 @@ export function RMCForm({
             <Field
               label="Agency details (location, phone, contact person, etc.)"
               htmlFor="ref_agency_details"
+              required
+              error={errors.ref_agency_details}
             >
               <TextArea
                 id="ref_agency_details"
                 value={text.ref_agency_details}
+                invalid={Boolean(errors.ref_agency_details)}
                 placeholder="Enter agency details…"
                 onChange={(value) => setField('ref_agency_details', value)}
               />
             </Field>
 
             <div className="grid gap-x-4 sm:grid-cols-2">
-              <Field label="Intake date" htmlFor="intake_date">
+              <Field label="Intake date" htmlFor="intake_date" required error={errors.intake_date}>
                 <DatePicker
                   id="intake_date"
                   value={text.intake_date}
                   onChange={(value) => setField('intake_date', value)}
                 />
               </Field>
-              <Field label="Intake time" htmlFor="intake_time">
+              <Field label="Intake time" htmlFor="intake_time" required error={errors.intake_time}>
                 <TimePicker
                   id="intake_time"
                   value={text.intake_time}
@@ -582,10 +722,16 @@ export function RMCForm({
               </Field>
             </div>
 
-            <Field label="Planned transportation method" htmlFor="transport">
+            <Field
+              label="Planned transportation method"
+              htmlFor="transport"
+              required
+              error={errors.transport}
+            >
               <Select
                 id="transport"
                 value={text.transport}
+                invalid={Boolean(errors.transport)}
                 placeholder="Select transportation method"
                 options={TRANSPORT_OPTIONS}
                 onChange={(value) => setField('transport', value)}
@@ -593,10 +739,16 @@ export function RMCForm({
             </Field>
 
             {text.transport === 'other' ? (
-              <Field label="Please specify" htmlFor="transportOther_te">
+              <Field
+                label="Please specify"
+                htmlFor="transportOther_te"
+                required
+                error={errors.transportOther_te}
+              >
                 <TextInput
                   id="transportOther_te"
                   value={text.transportOther_te}
+                  invalid={Boolean(errors.transportOther_te)}
                   placeholder="Enter transportation method…"
                   onChange={(value) => setField('transportOther_te', value)}
                 />
@@ -609,14 +761,14 @@ export function RMCForm({
                   Transportation details
                 </h3>
                 <div className="grid gap-x-4 sm:grid-cols-2">
-                  <Field label="Pickup date" htmlFor="travel_date">
+                  <Field label="Pickup date" htmlFor="travel_date" required error={errors.travel_date}>
                     <DatePicker
                       id="travel_date"
                       value={text.travel_date}
                       onChange={(value) => setField('travel_date', value)}
                     />
                   </Field>
-                  <Field label="Pickup time" htmlFor="travel_time">
+                  <Field label="Pickup time" htmlFor="travel_time" required error={errors.travel_time}>
                     <TimePicker
                       id="travel_time"
                       value={text.travel_time}
@@ -624,35 +776,54 @@ export function RMCForm({
                     />
                   </Field>
                 </div>
-                <Field label="Pickup address" htmlFor="travel_addy">
+                <Field label="Pickup address" htmlFor="travel_addy" required error={errors.travel_addy}>
                   <TextInput
                     id="travel_addy"
                     value={text.travel_addy}
+                    invalid={Boolean(errors.travel_addy)}
                     placeholder="Enter pickup address…"
                     onChange={(value) => setField('travel_addy', value)}
                   />
                 </Field>
-                <Field label="Phone to confirm pickup" htmlFor="travel_phone">
+                <Field
+                  label="Phone to confirm pickup"
+                  htmlFor="travel_phone"
+                  required
+                  error={errors.travel_phone}
+                >
                   <TextInput
                     id="travel_phone"
                     type="tel"
                     value={text.travel_phone}
+                    invalid={Boolean(errors.travel_phone)}
                     placeholder="Enter phone number…"
                     onChange={(value) => setField('travel_phone', value)}
                   />
                 </Field>
-                <Field label="Return location" htmlFor="travel_return">
+                <Field
+                  label="Return location"
+                  htmlFor="travel_return"
+                  required
+                  error={errors.travel_return}
+                >
                   <TextInput
                     id="travel_return"
                     value={text.travel_return}
+                    invalid={Boolean(errors.travel_return)}
                     placeholder="Enter return location…"
                     onChange={(value) => setField('travel_return', value)}
                   />
                 </Field>
-                <Field label="Other comments or notes about transportation" htmlFor="travel_notes">
+                <Field
+                  label="Other comments or notes about transportation"
+                  htmlFor="travel_notes"
+                  required
+                  error={errors.travel_notes}
+                >
                   <TextArea
                     id="travel_notes"
                     value={text.travel_notes}
+                    invalid={Boolean(errors.travel_notes)}
                     placeholder="Enter any additional notes…"
                     onChange={(value) => setField('travel_notes', value)}
                   />
@@ -664,7 +835,11 @@ export function RMCForm({
 
         {declinedReferral ? (
           <>
-            <Field label="What kinds of other things do you want to try to accomplish to meet your goal? (Check all that apply)">
+            <Field
+              label="What kinds of other things do you want to try to accomplish to meet your goal? (Check all that apply)"
+              required
+              error={errors.altOptions}
+            >
               <CheckboxGrid columns={2}>
                 {ALT_OPTIONS.map((option) => (
                   <CheckboxRow
@@ -679,10 +854,11 @@ export function RMCForm({
             </Field>
 
             {flags.alt_other ? (
-              <Field label="Please specify" htmlFor="alt_other_te">
+              <Field label="Please specify" htmlFor="alt_other_te" required error={errors.alt_other_te}>
                 <TextInput
                   id="alt_other_te"
                   value={text.alt_other_te}
+                  invalid={Boolean(errors.alt_other_te)}
                   placeholder="Enter other option…"
                   onChange={(value) => setField('alt_other_te', value)}
                 />
@@ -696,10 +872,13 @@ export function RMCForm({
         <Field
           label="Which of the following best describes the participant’s status at the end of the meeting?"
           htmlFor="lm_ptStatus"
+          required
+          error={errors.lm_ptStatus}
         >
           <Select
             id="lm_ptStatus"
             value={text.lm_ptStatus}
+            invalid={Boolean(errors.lm_ptStatus)}
             placeholder="Select a status"
             options={PARTICIPANT_STATUS_OPTIONS.map((s) => ({ value: s, label: s }))}
             onChange={(value) => setField('lm_ptStatus', value)}
@@ -711,17 +890,42 @@ export function RMCForm({
         <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
           Staff- stop recording
         </p>
-        <Field label="Did you record this meeting?" htmlFor="recording">
+
+        <Field
+          label="Meeting end time:"
+          htmlFor="time_RMC_end"
+          required
+          error={errors.time_RMC_end}
+        >
+          <TimePicker
+            id="time_RMC_end"
+            value={text.time_RMC_end}
+            onChange={(value) => setField('time_RMC_end', value)}
+          />
+        </Field>
+
+        <Field
+          label="Did you record this meeting?"
+          htmlFor="recording"
+          required
+          error={errors.recording}
+        >
           <Select
             id="recording"
             value={text.recording}
+            invalid={Boolean(errors.recording)}
             options={YES_NO}
             onChange={(value) => setField('recording', value)}
           />
         </Field>
 
         {text.recording === 'yes' ? (
-          <Field label="What date did you upload the recording?" htmlFor="recording_upload_date">
+          <Field
+            label="What date did you upload the recording?"
+            htmlFor="recording_upload_date"
+            required
+            error={errors.recording_upload_date}
+          >
             <DatePicker
               id="recording_upload_date"
               value={text.recording_upload_date}
@@ -735,24 +939,19 @@ export function RMCForm({
           <Field
             label="What was the reason for not recording the RMC meeting?"
             htmlFor="recording_reason"
+            required
+            error={errors.recording_reason}
           >
             <TextArea
               id="recording_reason"
               rows={4}
               value={text.recording_reason}
+              invalid={Boolean(errors.recording_reason)}
               placeholder="Enter reason…"
               onChange={(value) => setField('recording_reason', value)}
             />
           </Field>
         ) : null}
-
-        <Field label="Meeting end time:" htmlFor="time_RMC_end">
-          <TimePicker
-            id="time_RMC_end"
-            value={text.time_RMC_end}
-            onChange={(value) => setField('time_RMC_end', value)}
-          />
-        </Field>
       </Card>
 
       <ButtonRow>
@@ -789,7 +988,12 @@ function RecapSection({
   rsa: RSAContext;
   concatenated?: boolean;
   talkingPoints?: TalkingPointBlock;
-  question?: { label: string; value: string; onChange: (value: string) => void };
+  question?: {
+    label: string;
+    value: string;
+    error?: string;
+    onChange: (value: string) => void;
+  };
 }) {
   const section = RSA_SECTIONS.find((s) => s.number === sectionNumber);
   if (!section) return null;
@@ -819,10 +1023,11 @@ function RecapSection({
 
       {question ? (
         <div className="mt-5">
-          <Field label={question.label}>
+          <Field label={question.label} required error={question.error}>
             <TextArea
               value={question.value}
               placeholder="Enter response…"
+              invalid={Boolean(question.error)}
               onChange={question.onChange}
             />
           </Field>

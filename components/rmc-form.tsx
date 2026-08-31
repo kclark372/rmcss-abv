@@ -215,7 +215,20 @@ export function RMCForm({
   }
 
   function toggleFlag(key: ReferralTypeKey | AltOptionKey) {
-    setFlags((prev) => ({ ...prev, [key]: !prev[key] }));
+    setFlags((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      if (next[key] && key.startsWith('alt_')) {
+        if (key === 'alt_none') {
+          // "None of above" is exclusive — clear the other alternatives.
+          for (const option of ALT_OPTIONS) {
+            if (option.key !== 'alt_none') next[option.key] = false;
+          }
+        } else {
+          next.alt_none = false;
+        }
+      }
+      return next;
+    });
     clearError('refTypes');
     clearError('altOptions');
   }

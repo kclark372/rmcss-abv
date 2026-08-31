@@ -373,8 +373,8 @@ export function EmptyRecap({ children }: { children: ReactNode }) {
 /**
  * Motivational-interviewing prompts for staff.
  *
- * Reveals on hover; on touch (or by keyboard), tapping the header pins it open
- * until tapped again.
+ * Collapsed by default; tapping the header toggles it. It stays put while the
+ * page scrolls — only a deliberate tap opens or closes it.
  */
 export function TalkingPoints({
   title,
@@ -383,23 +383,26 @@ export function TalkingPoints({
   title: string;
   groups: readonly TalkingPointGroup[];
 }) {
-  const [pinned, setPinned] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="group mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+    <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5">
       <button
         type="button"
-        onClick={() => setPinned((open) => !open)}
-        aria-expanded={pinned}
-        className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium text-amber-900"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 text-left text-xs font-medium text-amber-900"
       >
         <span>{title}</span>
-        <span aria-hidden className="shrink-0 text-xs font-normal text-amber-500">
-          {pinned ? 'tap to hide' : 'hover or tap'}
+        <span
+          aria-hidden
+          className={`shrink-0 text-amber-500 transition-transform ${open ? 'rotate-180' : ''}`}
+        >
+          ▾
         </span>
       </button>
 
-      <div className={pinned ? 'block' : 'hidden group-hover:block'}>
+      <div className={open ? 'block pb-1' : 'hidden'}>
         {groups.map((group, groupIndex) => (
           <div key={groupIndex} className={groupIndex === 0 ? 'mt-2' : 'mt-3'}>
             {group.label ? (

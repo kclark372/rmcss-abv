@@ -49,6 +49,16 @@ export const ALT_OPTIONS = [
 
 export type AltOptionKey = (typeof ALT_OPTIONS)[number]['key'];
 
+/** Participant status at the end of the meeting — stored in `lm_ptStatus`. */
+export const PARTICIPANT_STATUS_OPTIONS = [
+  'No current substance use',
+  'Substance use and not interested in any behavior change or recovery services',
+  'Currently in treatment',
+  'Referred to harm reduction services',
+  'Agreed to other behavior change',
+  'Referred to treatment',
+] as const;
+
 export const TRANSPORT_OPTIONS = [
   { value: 'self', label: 'Self-transport (skip pickup)' },
   { value: 'bus', label: 'Bus card (skip pickup)' },
@@ -155,6 +165,13 @@ export const rmcSubmissionSchema = z
     /** Readiness rulers, 1-10. Stored in `important` / `confident`. */
     important: z.number().int().min(1).max(10).nullable().default(null),
     confident: z.number().int().min(1).max(10).nullable().default(null),
+
+    /** Meeting start/end times (HH:MM), staff-entered. Stored as time fields. */
+    time_RMC_begin: optionalTime,
+    time_RMC_end: optionalTime,
+
+    /** Participant status at end of meeting. Stored in `lm_ptStatus`. */
+    lm_ptStatus: z.string().trim().max(255).default(''),
 
     /** Recording. Stored in `recording`. */
     recording: z.enum(['yes', 'no']).or(z.literal('')).default(''),

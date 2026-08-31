@@ -9,6 +9,7 @@ import { TALKING_POINTS, type TalkingPointBlock } from '@/lib/talking-points';
 import {
   ALT_OPTIONS,
   GOALS,
+  PARTICIPANT_STATUS_OPTIONS,
   REFERRAL_AGENCIES,
   REFERRAL_TYPES,
   TRANSPORT_NEEDING_PICKUP,
@@ -75,6 +76,9 @@ interface FormValues {
   reason_TxStay_te: string;
   goal: string;
   goal_te: string;
+  time_RMC_begin: string;
+  time_RMC_end: string;
+  lm_ptStatus: string;
   recording: string;
   recording_upload_date: string;
   recording_reason: string;
@@ -104,6 +108,9 @@ const EMPTY_VALUES: FormValues = {
   reason_TxStay_te: '',
   goal: '',
   goal_te: '',
+  time_RMC_begin: '',
+  time_RMC_end: '',
+  lm_ptStatus: '',
   recording: '',
   recording_upload_date: '',
   recording_reason: '',
@@ -334,7 +341,15 @@ export function RMCForm({
         </dl>
       </Card>
 
-      <Card title="Staff- start recording for CogniTrainer" />
+      <Card title="Staff- start recording for CogniTrainer">
+        <Field label="Meeting start time:" htmlFor="time_RMC_begin">
+          <TimePicker
+            id="time_RMC_begin"
+            value={text.time_RMC_begin}
+            onChange={(value) => setField('time_RMC_begin', value)}
+          />
+        </Field>
+      </Card>
 
       <RecapSection sectionNumber={1} rsa={rsa} />
 
@@ -677,6 +692,21 @@ export function RMCForm({
         ) : null}
       </Card>
 
+      <Card title="Status">
+        <Field
+          label="Which of the following best describes the participant’s status at the end of the meeting?"
+          htmlFor="lm_ptStatus"
+        >
+          <Select
+            id="lm_ptStatus"
+            value={text.lm_ptStatus}
+            placeholder="Select a status"
+            options={PARTICIPANT_STATUS_OPTIONS.map((s) => ({ value: s, label: s }))}
+            onChange={(value) => setField('lm_ptStatus', value)}
+          />
+        </Field>
+      </Card>
+
       <Card title="Recording">
         <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
           Staff- stop recording
@@ -715,12 +745,18 @@ export function RMCForm({
             />
           </Field>
         ) : null}
+
+        <Field label="Meeting end time:" htmlFor="time_RMC_end">
+          <TimePicker
+            id="time_RMC_end"
+            value={text.time_RMC_end}
+            onChange={(value) => setField('time_RMC_end', value)}
+          />
+        </Field>
       </Card>
 
       <ButtonRow>
-        <Button variant="secondary" onClick={startNewMeeting}>
-          Cancel
-        </Button>
+        <span />
         <Button onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <>

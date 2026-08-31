@@ -266,7 +266,7 @@ export function RMCForm({
         need('travel_addy', filled(text.travel_addy));
         need('travel_phone', filled(text.travel_phone));
         need('travel_return', filled(text.travel_return));
-        need('travel_notes', filled(text.travel_notes));
+        // travel_notes is optional.
       }
     }
 
@@ -817,13 +817,10 @@ export function RMCForm({
                 <Field
                   label="Other comments or notes about transportation"
                   htmlFor="travel_notes"
-                  required
-                  error={errors.travel_notes}
                 >
                   <TextArea
                     id="travel_notes"
                     value={text.travel_notes}
-                    invalid={Boolean(errors.travel_notes)}
                     placeholder="Enter any additional notes…"
                     onChange={(value) => setField('travel_notes', value)}
                   />

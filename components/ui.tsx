@@ -186,12 +186,14 @@ export function TextArea({
   onChange,
   placeholder,
   rows = 3,
+  invalid,
 }: {
   id?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   rows?: number;
+  invalid?: boolean;
 }) {
   return (
     <textarea
@@ -199,8 +201,9 @@ export function TextArea({
       rows={rows}
       value={value}
       placeholder={placeholder}
+      aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
-      className={`${controlClass} resize-y`}
+      className={`${controlClass} resize-y ${invalid ? 'border-red-400' : ''}`}
     />
   );
 }

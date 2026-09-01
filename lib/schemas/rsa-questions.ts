@@ -28,12 +28,19 @@ export interface RSASection {
   questions: RSAQuestion[];
 }
 
+/** Shown once at the top of the self-assessment, before section 1. */
+export const RSA_INTRODUCTION =
+  'This is a short self-assessment to help you and your linkage manager review ' +
+  'what has been going on in your life during the past 90 days, including today. ' +
+  'Your answers are confidential and will only be used to plan for your services. ' +
+  'In this assessment, ‘substances’ and ‘using’ refer to alcohol or drugs, ' +
+  'including cannabis and the misuse of prescription medications. Please check all that apply.';
+
 export const RSA_SECTIONS: RSASection[] = [
   {
     number: 1,
-    title: 'Drug and Alcohol Use',
-    intro:
-      'These questions help us understand your experience with substance use. Your honest answers are important for us to provide the best support possible.',
+    title: 'Substance Use/Recovery Feedback',
+    intro: 'During the past 90 days, have you used any:',
     recapTitle: 'From your RMC self-assessment you said you\'ve been using:',
     questions: [
       { key: 's1a_alcohol', label: 'Beer, wine, mixed drinks or other alcohol', recap: 'beer, wine, mixed drinks or other alcohol' },
@@ -47,7 +54,10 @@ export const RSA_SECTIONS: RSASection[] = [
   },
   {
     number: 2,
-    title: 'Consequences of Use',
+    // No category heading in the spreadsheet — the question stands alone.
+    title: '',
+    intro:
+      'Which of the following apply to you when you were using during the past 90 days:',
     recapTitle: 'And that you\'ve experienced:',
     questions: [
       { key: 's2a_weekly', label: 'Used weekly or more often', recap: 'used weekly or more often' },
@@ -66,7 +76,9 @@ export const RSA_SECTIONS: RSASection[] = [
   },
   {
     number: 3,
-    title: 'Help Received',
+    title: 'Treatment participation and recovery support feedback',
+    intro:
+      'Which of the following apply to you when you were using during the past 90 days:',
     recapTitle: 'Help you have received for your drug and alcohol use',
     questions: [
       { key: 's3a_selfhelp', label: 'Attended self-help or peer support group', recap: 'attended a self-help, peer support, or other recovery support group meeting' },
@@ -81,7 +93,8 @@ export const RSA_SECTIONS: RSASection[] = [
   },
   {
     number: 4,
-    title: 'Reasons to Change',
+    title: 'Desire for help',
+    intro: 'Which of the following make you want to change or stop your substance use?',
     recapTitle: 'Reasons you mentioned why you did want to change or get help',
     questions: [
       { key: 's4a_balance', label: 'Get more balance or stability', recap: 'get more balance or stability in your life' },
@@ -100,7 +113,9 @@ export const RSA_SECTIONS: RSASection[] = [
   },
   {
     number: 5,
-    title: 'Thoughts About Treatment',
+    title: 'Treatment Expectations',
+    intro:
+      'Which of the following reflects your current thoughts about participating in treatment?',
     recapTitle: 'Your current thoughts about participating in treatment',
     questions: [
       { key: 's5a_txhelp', label: 'Treatment could help you', recap: 'treatment could help you' },
@@ -116,7 +131,8 @@ export const RSA_SECTIONS: RSASection[] = [
   },
   {
     number: 6,
-    title: 'Barriers to Treatment',
+    title: 'Treatment Barriers',
+    intro: 'Which of the following are barriers to you participating in treatment?',
     recapTitle: 'Things that might make it difficult for you to go to or stay in treatment',
     questions: [
       { key: 's6a_friends', label: 'Friends will try to get you to use again', recap: 'friends will try to get you to drink or use again' },
@@ -136,7 +152,8 @@ export const RSA_SECTIONS: RSASection[] = [
   },
   {
     number: 7,
-    title: 'Legal Status',
+    title: 'Legal System Status',
+    intro: 'Which of the following apply to you during the past 90 days?',
     recapTitle: 'Legal Status',
     questions: [
       { key: 's7a_arrest', label: 'Arrested 1 or more times', recap: 'arrested 1 or more times' },
@@ -152,6 +169,7 @@ export const RSA_SECTIONS: RSASection[] = [
   {
     number: 8,
     title: 'Housing Status',
+    intro: 'Which of the following apply to you during the past 90 days?',
     recapTitle: 'Housing Status',
     // NOTE: abv_RSA has no `s8z_none` field, so section 8 has no "none" option.
     // If one is wanted, add the field in FileMaker and put it on the layout first.

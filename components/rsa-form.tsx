@@ -6,6 +6,7 @@ import { submitRSA } from '@/app/actions/submit-rsa';
 import { DatePicker } from '@/components/date-time';
 import {
   AGENCIES,
+  RSA_INTRODUCTION,
   RSA_QUESTION_KEYS,
   RSA_SECTIONS,
   STAFF_BY_AGENCY,
@@ -411,7 +412,24 @@ function SectionStep({
 
   return (
     <>
-      <Card title={section.title} description={section.intro}>
+      {sectionIndex === 0 ? (
+        <Card>
+          <p className="text-sm leading-relaxed text-slate-600">{RSA_INTRODUCTION}</p>
+        </Card>
+      ) : null}
+
+      <Card title={section.title || undefined}>
+        {section.intro ? (
+          section.title ? (
+            <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+              {section.intro}
+            </p>
+          ) : (
+            <h2 className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+              {section.intro}
+            </h2>
+          )
+        ) : null}
         <CheckboxGrid>
           {section.questions.map((question) => (
             <CheckboxRow

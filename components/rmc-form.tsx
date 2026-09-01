@@ -596,7 +596,7 @@ export function RMCForm({
             </div>
           </Card>
 
-          <Card title="Confidence in Your Ability">
+          <Card title="Confidence">
             <TalkingPoints
               title={TALKING_POINTS.confidence.title}
               groups={TALKING_POINTS.confidence.groups}
@@ -843,40 +843,41 @@ export function RMCForm({
           </>
         ) : null}
 
-        {declinedReferral ? (
-          <>
-            <Field
-              label="What kinds of other things do you want to try to accomplish to meet your goal? (Check all that apply)"
-              required
-              error={errors.altOptions}
-            >
-              <CheckboxGrid columns={2}>
-                {ALT_OPTIONS.map((option) => (
-                  <CheckboxRow
-                    key={option.key}
-                    id={option.key}
-                    label={option.label}
-                    checked={flags[option.key]}
-                    onChange={() => toggleFlag(option.key)}
-                  />
-                ))}
-              </CheckboxGrid>
-            </Field>
-
-            {flags.alt_other ? (
-              <Field label="Please specify" htmlFor="alt_other_te" required error={errors.alt_other_te}>
-                <TextInput
-                  id="alt_other_te"
-                  value={text.alt_other_te}
-                  invalid={Boolean(errors.alt_other_te)}
-                  placeholder="Enter other option…"
-                  onChange={(value) => setField('alt_other_te', value)}
-                />
-              </Field>
-            ) : null}
-          </>
-        ) : null}
       </Card>
+
+      {declinedReferral ? (
+        <Card title="Harm Reduction/Behavioral Changes">
+          <Field
+            label="What kinds of other things do you want to try to accomplish to meet your goal? (Check all that apply)"
+            required
+            error={errors.altOptions}
+          >
+            <CheckboxGrid columns={2}>
+              {ALT_OPTIONS.map((option) => (
+                <CheckboxRow
+                  key={option.key}
+                  id={option.key}
+                  label={option.label}
+                  checked={flags[option.key]}
+                  onChange={() => toggleFlag(option.key)}
+                />
+              ))}
+            </CheckboxGrid>
+          </Field>
+
+          {flags.alt_other ? (
+            <Field label="Please specify" htmlFor="alt_other_te" required error={errors.alt_other_te}>
+              <TextInput
+                id="alt_other_te"
+                value={text.alt_other_te}
+                invalid={Boolean(errors.alt_other_te)}
+                placeholder="Enter other option…"
+                onChange={(value) => setField('alt_other_te', value)}
+              />
+            </Field>
+          ) : null}
+        </Card>
+      ) : null}
 
       <Card title="Status">
         <Field

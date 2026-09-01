@@ -422,11 +422,11 @@ function SectionStep({
         {section.intro ? (
           section.title ? (
             <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
-              {section.intro}
+              {section.intro} (check all that apply)
             </p>
           ) : (
             <h2 className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
-              {section.intro}
+              {section.intro} (check all that apply)
             </h2>
           )
         ) : null}

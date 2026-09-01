@@ -77,8 +77,7 @@ export const RSA_SECTIONS: RSASection[] = [
   {
     number: 3,
     title: 'Treatment participation and recovery support feedback',
-    intro:
-      'Which of the following apply to you when you were using during the past 90 days:',
+    intro: 'Which of the following apply to you during the past 90 days:',
     recapTitle: 'Help you have received for your drug and alcohol use',
     questions: [
       { key: 's3a_selfhelp', label: 'Attended self-help or peer support group', recap: 'attended a self-help, peer support, or other recovery support group meeting' },

@@ -54,7 +54,8 @@ export const RSA_SECTIONS: RSASection[] = [
   },
   {
     number: 2,
-    title: 'Consequences of Use',
+    // No category heading in the spreadsheet — the question stands alone.
+    title: '',
     intro:
       'Which of the following apply to you when you were using during the past 90 days:',
     recapTitle: 'And that you\'ve experienced:',

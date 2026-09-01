@@ -418,7 +418,15 @@ function SectionStep({
         </Card>
       ) : null}
 
-      <Card title={section.title} description={section.intro}>
+      <Card
+        title={section.title || undefined}
+        description={section.title ? section.intro : undefined}
+      >
+        {!section.title && section.intro ? (
+          <h2 className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+            {section.intro}
+          </h2>
+        ) : null}
         <CheckboxGrid>
           {section.questions.map((question) => (
             <CheckboxRow

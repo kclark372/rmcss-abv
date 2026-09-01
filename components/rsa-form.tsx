@@ -418,11 +418,15 @@ function SectionStep({
         </Card>
       ) : null}
 
-      <Card title={section.title || undefined}>
+      <Card
+        title={
+          section.title ? `${section.title} (check all that apply)` : undefined
+        }
+      >
         {section.intro ? (
           section.title ? (
             <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
-              {section.intro} (check all that apply)
+              {section.intro}
             </p>
           ) : (
             <h2 className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">

@@ -33,8 +33,8 @@ export type ReferralTypeKey = (typeof REFERRAL_TYPES)[number]['key'];
 
 /** Alternative actions when no referral is wanted — "1"/"0" fields on abv_RMC. */
 export const ALT_OPTIONS = [
-  { key: 'alt_ssp', label: 'Use syringe exchange/overdose prevention services' },
   { key: 'alt_reduce', label: 'Reduce use' },
+  { key: 'alt_ssp', label: 'Use syringe exchange / overdose prevention services' },
   { key: 'alt_nar', label: 'Take Narcan/fentanyl test strips' },
   { key: 'alt_counselor', label: 'Talk to your counselor' },
   { key: 'alt_selfHelp', label: 'Attend self-help meetings' },

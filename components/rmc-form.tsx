@@ -467,6 +467,35 @@ export function RMCForm({
         </Field>
       </Card>
 
+      <Card title="Linkage Manager’s Introduction Script">
+        <div className="space-y-3 text-sm leading-relaxed text-slate-700">
+          <p>
+            Hello {rsa.name_legal_full || 'there'}, I’m {rsa.staffName || 'your linkage manager'}.
+            Today we’ll be reviewing your self-assessment and talking about how
+            you’ve been doing lately and what you might need for support.
+          </p>
+          <p>
+            Thank you for being a part of this project and taking the time to
+            allow me to speak with you today. That shows your commitment. You are
+            a responsible person. You know how to follow through / keep your word.
+          </p>
+          <p>
+            Thanks for filling out your self-assessment! Let’s chat about how
+            things have been for you lately with your alcohol and other drug use.
+            You may recall that the purpose of the program is to see if regular
+            checkups help improve your recovery and health.
+          </p>
+          <p className="italic text-slate-600">
+            (Optional text to read: One helpful way to manage chronic conditions
+            is through regular monitoring and checkups. For example, people with
+            diabetes don’t wait until an arm or leg needs to be cut off before
+            they see a doctor. Instead, they work with their doctor to manage the
+            condition on a regular basis. How does that fit with your
+            understanding? What do you make of that?)
+          </p>
+        </div>
+      </Card>
+
       <RecapSection sectionNumber={1} rsa={rsa} />
 
       <RecapSection

@@ -170,8 +170,11 @@ export const rmcSubmissionSchema = z
     time_RMC_begin: optionalTime,
     time_RMC_end: optionalTime,
 
-    /** Participant status at end of meeting. Stored in `lm_ptStatus`. */
-    lm_ptStatus: z.string().trim().max(255).default(''),
+    /**
+     * Participant status at end of meeting — a check-all list joined with ", ".
+     * Stored in `lm_ptStatus`.
+     */
+    lm_ptStatus: z.string().trim().max(1000).default(''),
 
     /** Recording. Stored in `recording`. */
     recording: z.enum(['yes', 'no']).or(z.literal('')).default(''),

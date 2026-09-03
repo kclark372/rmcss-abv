@@ -204,6 +204,18 @@ export function RMCForm({
     clearError(key);
   }
 
+  /** `lm_ptStatus` is a check-all list stored as a ", "-joined string. */
+  function toggleStatus(option: string) {
+    setText((prev) => {
+      const selected = prev.lm_ptStatus ? prev.lm_ptStatus.split(', ') : [];
+      const next = selected.includes(option)
+        ? selected.filter((value) => value !== option)
+        : [...selected, option];
+      return { ...prev, lm_ptStatus: next.join(', ') };
+    });
+    clearError('lm_ptStatus');
+  }
+
   function setImportant(value: number) {
     setImportantValue(value);
     clearError('important');
@@ -288,7 +300,7 @@ export function RMCForm({
       if (flags.alt_other) need('alt_other_te', filled(text.alt_other_te));
     }
 
-    need('lm_ptStatus', filled(text.lm_ptStatus), 'Select a status');
+    need('lm_ptStatus', filled(text.lm_ptStatus), 'Select at least one');
     need('recording', filled(text.recording), 'Select an option');
     if (text.recording === 'yes') {
       need('recording_upload_date', filled(text.recording_upload_date), 'Pick a date');
@@ -513,7 +525,8 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q1q2}
         question={{
-          label: "Is there any (other) kind of substance use or problems that you've had?",
+          label:
+            "Is there any (other) kind of substance use or problems that you've had? Which of these concerns you the most?",
           value: text.otherProblems_te,
           error: errors.otherProblems_te,
           onChange: (value) => setField('otherProblems_te', value),
@@ -525,7 +538,8 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q3}
         question={{
-          label: 'Have you gotten any (other) help with your alcohol or drug use?',
+          label:
+            'Have you gotten any (other) help with your alcohol or drug use? Were any of these helpful?',
           value: text.helpwithUse_te,
           error: errors.helpwithUse_te,
           onChange: (value) => setField('helpwithUse_te', value),
@@ -549,7 +563,7 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q5}
         question={{
-          label: 'What (other) reasons do you think might be helpful to go to treatment?',
+          label: 'Do you have any other thoughts about treatment or expectations?',
           value: text.reasonTxGo_te,
           error: errors.reasonTxGo_te,
           onChange: (value) => setField('reasonTxGo_te', value),
@@ -561,8 +575,7 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q6}
         question={{
-          label:
-            'What (other) reasons do you think it might be hard to go or stay in treatment or recovery?',
+          label: 'Any other reasons?',
           value: text.reason_TxStay_te,
           error: errors.reason_TxStay_te,
           onChange: (value) => setField('reason_TxStay_te', value),
@@ -925,24 +938,6 @@ export function RMCForm({
         </Card>
       ) : null}
 
-      <Card title="Status">
-        <Field
-          label="Which of the following best describes the participant’s status at the end of the meeting?"
-          htmlFor="lm_ptStatus"
-          required
-          error={errors.lm_ptStatus}
-        >
-          <Select
-            id="lm_ptStatus"
-            value={text.lm_ptStatus}
-            invalid={Boolean(errors.lm_ptStatus)}
-            placeholder="Select a status"
-            options={PARTICIPANT_STATUS_OPTIONS.map((s) => ({ value: s, label: s }))}
-            onChange={(value) => setField('lm_ptStatus', value)}
-          />
-        </Field>
-      </Card>
-
       <Card title="Recording">
         <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
           Staff- stop recording
@@ -1009,6 +1004,26 @@ export function RMCForm({
             />
           </Field>
         ) : null}
+      </Card>
+
+      <Card title="Status">
+        <Field
+          label="Which of the following describe the participant’s status at the end of the meeting? (Check all that apply)"
+          required
+          error={errors.lm_ptStatus}
+        >
+          <CheckboxGrid>
+            {PARTICIPANT_STATUS_OPTIONS.map((option, index) => (
+              <CheckboxRow
+                key={option}
+                id={`lm_ptStatus-${index}`}
+                label={option}
+                checked={text.lm_ptStatus.split(', ').includes(option)}
+                onChange={() => toggleStatus(option)}
+              />
+            ))}
+          </CheckboxGrid>
+        </Field>
       </Card>
 
       <ButtonRow>

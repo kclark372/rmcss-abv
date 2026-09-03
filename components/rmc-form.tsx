@@ -513,7 +513,8 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q1q2}
         question={{
-          label: "Is there any (other) kind of substance use or problems that you've had?",
+          label:
+            "Is there any (other) kind of substance use or problems that you've had? Which of these concerns you the most?",
           value: text.otherProblems_te,
           error: errors.otherProblems_te,
           onChange: (value) => setField('otherProblems_te', value),
@@ -525,7 +526,8 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q3}
         question={{
-          label: 'Have you gotten any (other) help with your alcohol or drug use?',
+          label:
+            'Have you gotten any (other) help with your alcohol or drug use? Where any of these helpful?',
           value: text.helpwithUse_te,
           error: errors.helpwithUse_te,
           onChange: (value) => setField('helpwithUse_te', value),
@@ -549,7 +551,7 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q5}
         question={{
-          label: 'What (other) reasons do you think might be helpful to go to treatment?',
+          label: 'Do you have any other thoughts about treatment or expectations?',
           value: text.reasonTxGo_te,
           error: errors.reasonTxGo_te,
           onChange: (value) => setField('reasonTxGo_te', value),
@@ -561,8 +563,7 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q6}
         question={{
-          label:
-            'What (other) reasons do you think it might be hard to go or stay in treatment or recovery?',
+          label: 'Any other reasons?',
           value: text.reason_TxStay_te,
           error: errors.reason_TxStay_te,
           onChange: (value) => setField('reason_TxStay_te', value),

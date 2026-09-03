@@ -624,7 +624,10 @@ export function RMCForm({
                 onChange={setImportant}
                 question={
                   <>
-                    How important is it for you to <strong>{goalPhrase}</strong>?{' '}
+                    On a scale of 1 to 10 with 1 being not important and 10 being
+                    extremely important. Can you tell me how{' '}
+                    <span className="font-semibold underline">important</span> it
+                    is for you to <strong>{goalPhrase}</strong>?{' '}
                     <span className="text-red-600">*</span>
                   </>
                 }
@@ -647,7 +650,11 @@ export function RMCForm({
                 onChange={setConfident}
                 question={
                   <>
-                    How confident are you that you can <strong>{goalPhrase}</strong>?{' '}
+                    On a scale of 1 to 10 (Using the ruler below), with 1 being
+                    not confident and 10 being extremely confident. Can you tell
+                    me how{' '}
+                    <span className="font-semibold underline">confident</span> are
+                    you in your ability to <strong>{goalPhrase}</strong>?{' '}
                     <span className="text-red-600">*</span>
                   </>
                 }

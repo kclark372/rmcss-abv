@@ -450,6 +450,16 @@ export function RMCForm({
           <InfoField label="Staff member" value={rsa.staffName} />
           <InfoField label="RSA date" value={formatUSDate(rsa.XADT)} />
         </dl>
+        <dl className="mt-3 space-y-3">
+          <InfoField
+            label="Legal status"
+            value={concatSectionRecap(rsa.answers, 7) || 'None reported'}
+          />
+          <InfoField
+            label="Housing status"
+            value={concatSectionRecap(rsa.answers, 8) || 'None reported'}
+          />
+        </dl>
       </Card>
 
       <Card title="Staff- start recording for CogniTrainer">
@@ -476,22 +486,22 @@ export function RMCForm({
           </p>
           <p>
             Thank you for being a part of this project and taking the time to
-            allow me to speak with you today. That shows your commitment. You are
-            a responsible person. You know how to follow through / keep your word.
+            allow me to speak with you today. That shows your, commitment. You
+            are a responsible person. You know how to follow through/keep your
+            word.
           </p>
           <p>
-            Thanks for filling out your self-assessment! Let’s chat about how
-            things have been for you lately with your alcohol and other drug use.
-            You may recall that the purpose of the program is to see if regular
-            checkups help improve your recovery and health.
-          </p>
-          <p className="italic text-slate-600">
-            (Optional text to read: One helpful way to manage chronic conditions
-            is through regular monitoring and checkups. For example, people with
-            diabetes don’t wait until an arm or leg needs to be cut off before
-            they see a doctor. Instead, they work with their doctor to manage the
-            condition on a regular basis. How does that fit with your
-            understanding? What do you make of that?)
+            Let’s chat about how things have been for you lately with your alcohol
+            and other drug use. You may recall that the purpose of the program is
+            to see if regular checkups help improve your recovery and health.{' '}
+            <span className="italic">
+              (optional text to read: One helpful way to manage chronic
+              conditions is through regular monitoring and checkups. For example,
+              people with diabetes don’t wait until an arm or leg needs to be cut
+              off before they see a doctor. Instead, they work with their doctor
+              to manage the condition on a regular basis. How does that fit with
+              your understanding? What do you make of that?)
+            </span>
           </p>
         </div>
       </Card>
@@ -559,8 +569,8 @@ export function RMCForm({
         }}
       />
 
-      <RecapSection sectionNumber={7} rsa={rsa} concatenated />
-      <RecapSection sectionNumber={8} rsa={rsa} concatenated />
+      {/* Legal Status (7) and Housing Status (8) now live in the
+          Participant Information card. */}
 
       <Card title="Other topics to discuss">
         {rsa.discuss_te.trim() ? (

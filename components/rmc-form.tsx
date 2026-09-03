@@ -938,26 +938,6 @@ export function RMCForm({
         </Card>
       ) : null}
 
-      <Card title="Status">
-        <Field
-          label="Which of the following describe the participant’s status at the end of the meeting? (Check all that apply)"
-          required
-          error={errors.lm_ptStatus}
-        >
-          <CheckboxGrid>
-            {PARTICIPANT_STATUS_OPTIONS.map((option, index) => (
-              <CheckboxRow
-                key={option}
-                id={`lm_ptStatus-${index}`}
-                label={option}
-                checked={text.lm_ptStatus.split(', ').includes(option)}
-                onChange={() => toggleStatus(option)}
-              />
-            ))}
-          </CheckboxGrid>
-        </Field>
-      </Card>
-
       <Card title="Recording">
         <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
           Staff- stop recording
@@ -1024,6 +1004,26 @@ export function RMCForm({
             />
           </Field>
         ) : null}
+      </Card>
+
+      <Card title="Status">
+        <Field
+          label="Which of the following describe the participant’s status at the end of the meeting? (Check all that apply)"
+          required
+          error={errors.lm_ptStatus}
+        >
+          <CheckboxGrid>
+            {PARTICIPANT_STATUS_OPTIONS.map((option, index) => (
+              <CheckboxRow
+                key={option}
+                id={`lm_ptStatus-${index}`}
+                label={option}
+                checked={text.lm_ptStatus.split(', ').includes(option)}
+                onChange={() => toggleStatus(option)}
+              />
+            ))}
+          </CheckboxGrid>
+        </Field>
       </Card>
 
       <ButtonRow>

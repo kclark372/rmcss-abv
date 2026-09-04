@@ -525,8 +525,7 @@ export function RMCForm({
         rsa={rsa}
         talkingPoints={TALKING_POINTS.q1q2}
         question={{
-          label:
-            "Is there any (other) kind of substance use or problems that you've had? Which of these concerns you the most?",
+          label: 'Which of these concerns you the most?',
           value: text.otherProblems_te,
           error: errors.otherProblems_te,
           onChange: (value) => setField('otherProblems_te', value),
@@ -904,6 +903,18 @@ export function RMCForm({
 
       </Card>
 
+      {wantsReferral ? (
+        <Card>
+          <p className="text-sm font-medium leading-relaxed text-slate-800">
+            LM – please PRINT and give “RMC Appointment Reminder &amp; referral
+            summary” information from above. If applicable, include information on
+            referral date/time/location &amp; instructions. If applicable, get a
+            specific release for collecting treatment initiation &amp; engagement
+            information.
+          </p>
+        </Card>
+      ) : null}
+
       {declinedReferral ? (
         <Card title="Harm Reduction/Behavioral Changes">
           <Field
@@ -937,6 +948,13 @@ export function RMCForm({
           ) : null}
         </Card>
       ) : null}
+
+      <Card>
+        <p className="text-base font-bold text-slate-900 sm:text-lg">
+          Conclude with an affirmation statement, thanking them for their
+          participation and effort.
+        </p>
+      </Card>
 
       <Card title="Recording">
         <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">

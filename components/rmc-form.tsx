@@ -62,6 +62,11 @@ function formatUSDate(iso: string): string {
   return match ? `${match[2]}/${match[3]}/${match[1]}` : iso;
 }
 
+/** First word of a "Firstname Lastname" name, for the spoken-script greeting. */
+function firstNameOf(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] ?? '';
+}
+
 type Flags = Record<string, boolean>;
 
 const EMPTY_FLAGS: Flags = {
@@ -493,7 +498,8 @@ export function RMCForm({
       <Card title="Linkage Manager’s Introduction Script">
         <div className="space-y-3 text-sm leading-relaxed text-slate-700">
           <p>
-            Hello {rsa.name_legal_full || 'there'}, I’m {rsa.staffName || 'your linkage manager'}.
+            Hello {rsa.name_legal_full || 'there'}, I’m{' '}
+            {rsa.staffName ? firstNameOf(rsa.staffName) : 'your linkage manager'}.
             Today we’ll be reviewing your self-assessment and talking about how
             you’ve been doing lately and what you might need for support.
           </p>

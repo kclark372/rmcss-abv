@@ -490,6 +490,7 @@ export function RMCForm({
           <TimePicker
             id="time_RMC_begin"
             value={text.time_RMC_begin}
+            invalid={Boolean(errors.time_RMC_begin)}
             onChange={(value) => setField('time_RMC_begin', value)}
           />
         </Field>
@@ -788,6 +789,7 @@ export function RMCForm({
                 <DatePicker
                   id="intake_date"
                   value={text.intake_date}
+                  invalid={Boolean(errors.intake_date)}
                   onChange={(value) => setField('intake_date', value)}
                 />
               </Field>
@@ -795,6 +797,7 @@ export function RMCForm({
                 <TimePicker
                   id="intake_time"
                   value={text.intake_time}
+                  invalid={Boolean(errors.intake_time)}
                   onChange={(value) => setField('intake_time', value)}
                 />
               </Field>
@@ -843,6 +846,7 @@ export function RMCForm({
                     <DatePicker
                       id="travel_date"
                       value={text.travel_date}
+                      invalid={Boolean(errors.travel_date)}
                       onChange={(value) => setField('travel_date', value)}
                     />
                   </Field>
@@ -850,6 +854,7 @@ export function RMCForm({
                     <TimePicker
                       id="travel_time"
                       value={text.travel_time}
+                      invalid={Boolean(errors.travel_time)}
                       onChange={(value) => setField('travel_time', value)}
                     />
                   </Field>
@@ -979,6 +984,7 @@ export function RMCForm({
           <TimePicker
             id="time_RMC_end"
             value={text.time_RMC_end}
+            invalid={Boolean(errors.time_RMC_end)}
             onChange={(value) => setField('time_RMC_end', value)}
           />
         </Field>
@@ -1009,6 +1015,7 @@ export function RMCForm({
               id="recording_upload_date"
               value={text.recording_upload_date}
               disableAfterToday
+              invalid={Boolean(errors.recording_upload_date)}
               onChange={(value) => setField('recording_upload_date', value)}
             />
           </Field>

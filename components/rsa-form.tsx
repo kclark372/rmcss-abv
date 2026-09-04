@@ -310,6 +310,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
                 id="XADT"
                 value={entry.XADT}
                 disableAfterToday
+                invalid={Boolean(errors.XADT)}
                 onChange={(value) => updateEntry('XADT', value)}
               />
             </Field>

@@ -211,9 +211,16 @@ export const STAFF_BY_AGENCY = {
   COIP: ['Virgen Rodriguez', 'Katrina Ivory', 'Jose Alvarez', 'Lauretta Omale'],
   Haymarket: ['Roger Delhaye', 'Tyrone Baker', 'Angela Butler'],
   TEECH: ['Karen White', 'DeShara Shells', 'Jamia Puckett', 'Robert Bufford'],
+  'LI-C': [
+    'John Palmer',
+    'Keo Jean-Joseph',
+    'Anthony Abram',
+    'Diana Saavedra',
+    'Halina Krupa',
+  ],
 } as const;
 
-export const AGENCIES = ['COIP', 'Haymarket', 'TEECH'] as const;
+export const AGENCIES = ['COIP', 'Haymarket', 'TEECH', 'LI-C'] as const;
 export type Agency = (typeof AGENCIES)[number];
 
 /**

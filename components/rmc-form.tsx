@@ -464,11 +464,11 @@ export function RMCForm({
         </dl>
         <dl className="mt-3 space-y-3">
           <InfoField
-            label="Legal status"
+            label="Current legal status"
             value={concatSectionRecap(rsa.answers, 7) || 'None reported'}
           />
           <InfoField
-            label="Housing status"
+            label="Current housing status"
             value={concatSectionRecap(rsa.answers, 8) || 'None reported'}
           />
         </dl>

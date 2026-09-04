@@ -147,7 +147,7 @@ export function Field({
       </label>
       {hint ? <p className="mb-1.5 text-xs text-slate-500">{hint}</p> : null}
       {children}
-      {error ? <p className="mt-1.5 text-xs font-medium text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1.5 text-sm font-medium text-red-600">{error}</p> : null}
     </div>
   );
 }

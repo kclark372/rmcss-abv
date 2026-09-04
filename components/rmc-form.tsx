@@ -652,7 +652,7 @@ export function RMCForm({
                 }
               />
               {errors.important ? (
-                <p className="mt-2 text-xs font-medium text-red-600">{errors.important}</p>
+                <p className="mt-2 text-sm font-medium text-red-600">{errors.important}</p>
               ) : null}
             </div>
           </Card>
@@ -679,7 +679,7 @@ export function RMCForm({
                 }
               />
               {errors.confident ? (
-                <p className="mt-2 text-xs font-medium text-red-600">{errors.confident}</p>
+                <p className="mt-2 text-sm font-medium text-red-600">{errors.confident}</p>
               ) : null}
             </div>
           </Card>

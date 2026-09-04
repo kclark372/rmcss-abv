@@ -121,6 +121,9 @@ const controlClass =
   'placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 ' +
   'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500';
 
+/** Applied to a field's box when it's missing a required answer. */
+export const invalidControlClass = 'border-yellow-400 bg-yellow-50';
+
 export function Field({
   label,
   htmlFor,
@@ -147,7 +150,7 @@ export function Field({
       </label>
       {hint ? <p className="mb-1.5 text-xs text-slate-500">{hint}</p> : null}
       {children}
-      {error ? <p className="mt-1.5 text-xs font-medium text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1.5 text-sm font-medium text-red-600">{error}</p> : null}
     </div>
   );
 }
@@ -175,7 +178,7 @@ export function TextInput({
       placeholder={placeholder}
       aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
-      className={`${controlClass} ${invalid ? 'border-red-400' : ''}`}
+      className={`${controlClass} ${invalid ? invalidControlClass : ''}`}
     />
   );
 }
@@ -203,7 +206,7 @@ export function TextArea({
       placeholder={placeholder}
       aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
-      className={`${controlClass} resize-y ${invalid ? 'border-red-400' : ''}`}
+      className={`${controlClass} resize-y ${invalid ? invalidControlClass : ''}`}
     />
   );
 }
@@ -229,7 +232,7 @@ export function Select({
       value={value}
       aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
-      className={`${controlClass} ${invalid ? 'border-red-400' : ''}`}
+      className={`${controlClass} ${invalid ? invalidControlClass : ''}`}
     >
       <option value="">{placeholder}</option>
       {options.map((option) => (

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { lookupRSA, submitRMC } from '@/app/actions/submit-rmc';
 import { DatePicker, TimePicker } from '@/components/date-time';
+import { formatPhoneAsTyped } from '@/lib/phone';
 import { concatSectionRecap, RSA_SECTIONS } from '@/lib/schemas/rsa-questions';
 import { TALKING_POINTS, type TalkingPointBlock } from '@/lib/talking-points';
 import {
@@ -868,7 +869,9 @@ export function RMCForm({
                     value={text.travel_phone}
                     invalid={Boolean(errors.travel_phone)}
                     placeholder="Enter phone number…"
-                    onChange={(value) => setField('travel_phone', value)}
+                    onChange={(value) =>
+                      setField('travel_phone', formatPhoneAsTyped(value))
+                    }
                   />
                 </Field>
                 <Field

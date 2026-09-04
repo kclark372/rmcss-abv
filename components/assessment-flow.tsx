@@ -50,9 +50,20 @@ function Finished({ onRestart }: { onRestart: () => void }) {
     <PageShell>
       <PageHeader title="RMC Meeting Saved" />
       <Card>
-        <p className="text-base font-bold text-slate-900 sm:text-lg">
-          Provide participant payment
-        </p>
+        <div className="space-y-2 text-center text-base font-bold text-slate-900 sm:text-lg">
+          <p>Provide participant payment, if applicable.</p>
+          <p>This concludes the practice RSA and LAP meeting.</p>
+          <p>
+            Please reach out to{' '}
+            <a
+              href="mailto:RMCfacilitator@chestnut.org"
+              className="text-blue-600 underline hover:text-blue-800"
+            >
+              RMCfacilitator@chestnut.org
+            </a>{' '}
+            with any questions.
+          </p>
+        </div>
         <ButtonRow>
           <span />
           <Button onClick={onRestart}>New RMC Meeting</Button>

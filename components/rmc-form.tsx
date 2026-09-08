@@ -159,6 +159,11 @@ export function RMCForm({
   const [flags, setFlags] = useState<Flags>(EMPTY_FLAGS);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Client-only gate: has the intake appointment been booked yet? When "no",
+  // the intake date/time and transportation questions are hidden and left
+  // blank on the referral record.
+  const [apptDate, setApptDate] = useState('');
+
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [important, setImportantValue] = useState<number | null>(null);
@@ -220,6 +225,29 @@ export function RMCForm({
       return { ...prev, lm_ptStatus: next.join(', ') };
     });
     clearError('lm_ptStatus');
+  }
+
+  /** Yes/No gate for whether an intake appointment is already scheduled. */
+  function setApptDateAnswer(value: string) {
+    setApptDate(value);
+    clearError('apptDate');
+    if (value !== 'yes') {
+      // Drop any intake/transportation answers so they aren't saved when the
+      // appointment isn't booked yet.
+      setText((prev) => ({
+        ...prev,
+        intake_date: '',
+        intake_time: '',
+        transport: '',
+        transportOther_te: '',
+        travel_date: '',
+        travel_time: '',
+        travel_addy: '',
+        travel_phone: '',
+        travel_return: '',
+        travel_notes: '',
+      }));
+    }
   }
 
   function setImportant(value: number) {
@@ -285,19 +313,23 @@ export function RMCForm({
       need('ref_agency', filled(text.ref_agency), 'Select an agency');
       if (text.ref_agency === 'Other') need('agency_other', filled(text.agency_other));
       need('ref_agency_details', filled(text.ref_agency_details));
-      need('intake_date', filled(text.intake_date), 'Pick a date');
-      need('intake_time', filled(text.intake_time), 'Enter a time');
-      need('transport', filled(text.transport), 'Select a method');
-      if (text.transport === 'other') {
-        need('transportOther_te', filled(text.transportOther_te));
-      }
-      if (TRANSPORT_NEEDING_PICKUP.includes(text.transport)) {
-        need('travel_date', filled(text.travel_date), 'Pick a date');
-        need('travel_time', filled(text.travel_time), 'Enter a time');
-        need('travel_addy', filled(text.travel_addy));
-        need('travel_phone', filled(text.travel_phone));
-        need('travel_return', filled(text.travel_return));
-        // travel_notes is optional.
+
+      need('apptDate', filled(apptDate), 'Select an option');
+      if (apptDate === 'yes') {
+        need('intake_date', filled(text.intake_date), 'Pick a date');
+        need('intake_time', filled(text.intake_time), 'Enter a time');
+        need('transport', filled(text.transport), 'Select a method');
+        if (text.transport === 'other') {
+          need('transportOther_te', filled(text.transportOther_te));
+        }
+        if (TRANSPORT_NEEDING_PICKUP.includes(text.transport)) {
+          need('travel_date', filled(text.travel_date), 'Pick a date');
+          need('travel_time', filled(text.travel_time), 'Enter a time');
+          need('travel_addy', filled(text.travel_addy));
+          need('travel_phone', filled(text.travel_phone));
+          need('travel_return', filled(text.travel_return));
+          // travel_notes is optional.
+        }
       }
     }
 
@@ -387,6 +419,7 @@ export function RMCForm({
     setLookupId('');
     setText(EMPTY_VALUES);
     setFlags(EMPTY_FLAGS);
+    setApptDate('');
     setImportantValue(null);
     setConfidentValue(null);
   }
@@ -784,6 +817,24 @@ export function RMCForm({
               />
             </Field>
 
+            <Field
+              label="Do you have an appointment date?"
+              htmlFor="apptDate"
+              required
+              error={errors.apptDate}
+            >
+              <Select
+                id="apptDate"
+                value={apptDate}
+                invalid={Boolean(errors.apptDate)}
+                placeholder="Select an option"
+                options={YES_NO}
+                onChange={setApptDateAnswer}
+              />
+            </Field>
+
+            {apptDate === 'yes' ? (
+              <>
             <div className="grid gap-x-4 sm:grid-cols-2">
               <Field label="Intake date" htmlFor="intake_date" required error={errors.intake_date}>
                 <DatePicker
@@ -911,6 +962,8 @@ export function RMCForm({
                   />
                 </Field>
               </div>
+            ) : null}
+              </>
             ) : null}
           </>
         ) : null}

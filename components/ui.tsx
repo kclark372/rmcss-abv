@@ -385,6 +385,28 @@ export function EmptyRecap({ children }: { children: ReactNode }) {
 }
 
 /**
+ * MI-strategy names that lead their talking-point line ("Express Empathy: …").
+ * When an item starts with one of these followed by a colon, the name is bolded.
+ */
+const BOLD_LEAD_INS = [
+  'Express Empathy',
+  'Develop Discrepancy',
+  'Avoid Argumentation',
+  'Support Self-Efficacy',
+];
+
+function renderTalkingPointItem(item: string): ReactNode {
+  const leadIn = BOLD_LEAD_INS.find((phrase) => item.startsWith(`${phrase}:`));
+  if (!leadIn) return item;
+  return (
+    <>
+      <strong className="font-semibold">{leadIn}</strong>
+      {item.slice(leadIn.length)}
+    </>
+  );
+}
+
+/**
  * Motivational-interviewing prompts for staff.
  *
  * Collapsed by default; tapping the header toggles it. It stays put while the
@@ -429,7 +451,7 @@ export function TalkingPoints({
                     key={itemIndex}
                     className="list-disc text-sm leading-snug text-amber-900"
                   >
-                    {item}
+                    {renderTalkingPointItem(item)}
                   </li>
                 ))}
               </ul>

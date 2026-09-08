@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 
+import { invalidControlClass } from '@/components/ui';
+
 /**
  * Date and time inputs that don't rely on the browser's native pickers, which
  * look and behave differently in every browser and are awkward on the tablets
@@ -80,6 +82,7 @@ export function DatePicker({
   onChange,
   placeholder = 'Select a date',
   disableAfterToday = false,
+  invalid,
 }: {
   id?: string;
   value: string;
@@ -87,6 +90,7 @@ export function DatePicker({
   placeholder?: string;
   /** When set, days after today can't be picked from the calendar. */
   disableAfterToday?: boolean;
+  invalid?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -102,7 +106,8 @@ export function DatePicker({
         onClick={() => setIsOpen((open) => !open)}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className={triggerClass}
+        aria-invalid={invalid || undefined}
+        className={`${triggerClass} ${invalid ? invalidControlClass : ''}`}
       >
         <span className={selected ? 'text-slate-900' : 'text-slate-400'}>
           {selected ? DATE_LABEL.format(selected) : placeholder}
@@ -191,10 +196,12 @@ export function TimePicker({
   id,
   value,
   onChange,
+  invalid,
 }: {
   id?: string;
   value: string;
   onChange: (value: string) => void;
+  invalid?: boolean;
 }) {
   const fallbackId = useId();
   const groupId = id ?? fallbackId;
@@ -204,6 +211,7 @@ export function TimePicker({
   const hour = parts?.hour ?? 9;
   const minute = parts?.minute ?? 0;
   const meridiem = parts?.meridiem ?? 'AM';
+  const timeSelectClass = `${selectClass} ${invalid ? invalidControlClass : ''}`;
 
   function update(next: Partial<{ hour: number; minute: number; meridiem: 'AM' | 'PM' }>) {
     onChange(
@@ -220,9 +228,10 @@ export function TimePicker({
       <select
         id={groupId}
         aria-label="Hour"
+        aria-invalid={invalid || undefined}
         value={parts ? hour : ''}
         onChange={(event) => update({ hour: Number(event.target.value) })}
-        className={selectClass}
+        className={timeSelectClass}
       >
         {!parts ? <option value="">--</option> : null}
         {HOURS.map((h) => (
@@ -238,9 +247,10 @@ export function TimePicker({
 
       <select
         aria-label="Minute"
+        aria-invalid={invalid || undefined}
         value={parts ? minute : ''}
         onChange={(event) => update({ minute: Number(event.target.value) })}
-        className={selectClass}
+        className={timeSelectClass}
       >
         {!parts ? <option value="">--</option> : null}
         {MINUTES.map((m) => (
@@ -252,11 +262,12 @@ export function TimePicker({
 
       <select
         aria-label="AM or PM"
+        aria-invalid={invalid || undefined}
         value={parts ? meridiem : ''}
         onChange={(event) =>
           update({ meridiem: event.target.value as 'AM' | 'PM' })
         }
-        className={selectClass}
+        className={timeSelectClass}
       >
         {!parts ? <option value="">--</option> : null}
         <option value="AM">AM</option>

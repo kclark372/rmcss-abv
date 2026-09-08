@@ -291,7 +291,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
             ) : null}
 
             <Field
-              label="Participant name"
+              label="Participant first name and last initial"
               htmlFor="name_legal_full"
               required
               error={errors.name_legal_full}
@@ -300,7 +300,7 @@ export function RSAForm({ onComplete }: { onComplete?: (uuid: string) => void })
                 id="name_legal_full"
                 value={entry.name_legal_full}
                 invalid={Boolean(errors.name_legal_full)}
-                placeholder="Participant name"
+                placeholder="e.g. Jane D."
                 onChange={(value) => updateEntry('name_legal_full', value)}
               />
             </Field>

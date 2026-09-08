@@ -970,7 +970,7 @@ export function RMCForm({
 
       </Card>
 
-      {wantsReferral ? (
+      {wantsReferral && apptDate === 'yes' ? (
         <Card>
           <p className="text-sm font-medium leading-relaxed text-slate-800">
             LM – please PRINT and give “RMC Appointment Reminder &amp; referral

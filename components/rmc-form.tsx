@@ -687,7 +687,7 @@ export function RMCForm({
         </>
       ) : null}
 
-      <Card title="Treatment Referral">
+      <Card title="Treatment Referral" invalid={Boolean(errors.refTypes)}>
         <Field
           label="Does the person want help with a referral to (a different) SUD treatment program?"
           htmlFor="wantReferral"
@@ -930,7 +930,7 @@ export function RMCForm({
       ) : null}
 
       {declinedReferral ? (
-        <Card title="Harm Reduction/Behavioral Changes">
+        <Card title="Harm Reduction/Behavioral Changes" invalid={Boolean(errors.altOptions)}>
           <Field
             label="What kinds of other things do you want to try to accomplish to meet your goal? (Check all that apply)"
             required
@@ -1040,7 +1040,7 @@ export function RMCForm({
         ) : null}
       </Card>
 
-      <Card title="Status">
+      <Card title="Status" invalid={Boolean(errors.lm_ptStatus)}>
         <Field
           label="Which of the following describe the participant’s status at the end of the meeting? (Check all that apply)"
           required

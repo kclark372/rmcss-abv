@@ -43,13 +43,21 @@ export function Card({
   title,
   description,
   children,
+  invalid,
 }: {
   title?: string;
   description?: string;
   children?: ReactNode;
+  /** Tints the whole card red — used when a check-all question inside it
+   *  still needs at least one box. */
+  invalid?: boolean;
 }) {
   return (
-    <section className="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section
+      className={`mb-6 rounded-lg border p-5 shadow-sm sm:p-6 ${
+        invalid ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'
+      }`}
+    >
       {title ? (
         <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{title}</h2>
       ) : null}
@@ -117,12 +125,15 @@ export function ProgressBar({ percent, label }: { percent: number; label: string
 /* -------------------------------------------------------------------------- */
 
 const controlClass =
-  'block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm ' +
+  'block w-full rounded-md border px-3 py-2 text-sm text-slate-900 shadow-sm ' +
   'placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 ' +
   'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500';
 
-/** Applied to a field's box when it's missing a required answer. */
-export const invalidControlClass = 'border-yellow-400 bg-yellow-50';
+/** Border + fill for a control's normal (valid) state. */
+export const validControlClass = 'border-slate-300 bg-white';
+/** Border + fill for a control that's missing a required answer — matches the
+ *  error banner's red. Swap this IN PLACE OF `validControlClass`, don't layer. */
+export const invalidControlClass = 'border-red-400 bg-red-50';
 
 export function Field({
   label,
@@ -178,7 +189,7 @@ export function TextInput({
       placeholder={placeholder}
       aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
-      className={`${controlClass} ${invalid ? invalidControlClass : ''}`}
+      className={`${controlClass} ${invalid ? invalidControlClass : validControlClass}`}
     />
   );
 }
@@ -206,7 +217,7 @@ export function TextArea({
       placeholder={placeholder}
       aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
-      className={`${controlClass} resize-y ${invalid ? invalidControlClass : ''}`}
+      className={`${controlClass} resize-y ${invalid ? invalidControlClass : validControlClass}`}
     />
   );
 }
@@ -232,7 +243,7 @@ export function Select({
       value={value}
       aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
-      className={`${controlClass} ${invalid ? invalidControlClass : ''}`}
+      className={`${controlClass} ${invalid ? invalidControlClass : validControlClass}`}
     >
       <option value="">{placeholder}</option>
       {options.map((option) => (

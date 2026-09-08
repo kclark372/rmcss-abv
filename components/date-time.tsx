@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 
-import { invalidControlClass } from '@/components/ui';
+import { invalidControlClass, validControlClass } from '@/components/ui';
 
 /**
  * Date and time inputs that don't rely on the browser's native pickers, which
@@ -19,7 +19,7 @@ import { invalidControlClass } from '@/components/ui';
 /* -------------------------------------------------------------------------- */
 
 const triggerClass =
-  'flex w-full items-center justify-between gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-left text-sm shadow-sm ' +
+  'flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm shadow-sm ' +
   'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30';
 
 /** Closes the popover on an outside click or Escape. */
@@ -107,7 +107,7 @@ export function DatePicker({
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-invalid={invalid || undefined}
-        className={`${triggerClass} ${invalid ? invalidControlClass : ''}`}
+        className={`${triggerClass} ${invalid ? invalidControlClass : validControlClass}`}
       >
         <span className={selected ? 'text-slate-900' : 'text-slate-400'}>
           {selected ? DATE_LABEL.format(selected) : placeholder}
@@ -185,7 +185,7 @@ function joinTime(hour: number, minute: number, meridiem: 'AM' | 'PM'): string {
 }
 
 const selectClass =
-  'rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 shadow-sm ' +
+  'rounded-md border px-2 py-2 text-sm text-slate-900 shadow-sm ' +
   'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30';
 
 /**
@@ -211,7 +211,7 @@ export function TimePicker({
   const hour = parts?.hour ?? 9;
   const minute = parts?.minute ?? 0;
   const meridiem = parts?.meridiem ?? 'AM';
-  const timeSelectClass = `${selectClass} ${invalid ? invalidControlClass : ''}`;
+  const timeSelectClass = `${selectClass} ${invalid ? invalidControlClass : validControlClass}`;
 
   function update(next: Partial<{ hour: number; minute: number; meridiem: 'AM' | 'PM' }>) {
     onChange(

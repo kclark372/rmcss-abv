@@ -224,8 +224,14 @@ export const AGENCIES = ['COIP', 'Haymarket', 'TEECH', 'LI-C'] as const;
 export type Agency = (typeof AGENCIES)[number];
 
 /**
- * Joins the checked answers of one section into the comma-separated sentence
+ * Joins the checked answers of one section into the semicolon-separated sentence
  * that `abv_RMC::legalStatus` (section 7) and `housingStatus` (section 8) hold.
+ *
+ * Uses each option's `label` — the exact wording the participant saw on the
+ * checklist — so the RMC summary matches what they selected. Joined with "; "
+ * rather than ", " because several labels contain their own commas (e.g.
+ * "Spent 14+ days in facility" vs. housing labels like "Slept outside, in a
+ * car, or was unhoused"), which made a comma-joined list read as extra items.
  *
  * The RMC form displays the same string it is about to store, so this lives
  * here rather than in the server action and is used by both.
@@ -240,6 +246,6 @@ export function concatSectionRecap(
 
   return section.questions
     .filter((q) => !q.key.endsWith('z_none') && answers[q.key])
-    .map((q) => q.recap)
-    .join(', ');
+    .map((q) => q.label)
+    .join('; ');
 }

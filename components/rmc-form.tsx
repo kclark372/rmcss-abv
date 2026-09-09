@@ -985,7 +985,13 @@ export function RMCForm({
       {declinedReferral ? (
         <Card title="Harm Reduction/Behavioral Changes" invalid={Boolean(errors.altOptions)}>
           <Field
-            label="What kinds of other things do you want to try to accomplish to meet your goal? (Check all that apply)"
+            label={
+              <>
+                What kinds of other things do you want to try to accomplish to{' '}
+                <strong>{goalPhrase || 'meet your goal'}</strong>? (Check all that
+                apply)
+              </>
+            }
             required
             error={errors.altOptions}
           >

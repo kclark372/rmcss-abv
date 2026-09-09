@@ -369,6 +369,14 @@ export function RMCForm({
     }
     if (text.recording === 'no') need('recording_reason', filled(text.recording_reason));
     need('time_RMC_end', filled(text.time_RMC_end), 'Enter a time');
+    // The meeting can't end before it starts. "HH:MM" (24h) compares as strings.
+    if (
+      filled(text.time_RMC_begin) &&
+      filled(text.time_RMC_end) &&
+      text.time_RMC_end <= text.time_RMC_begin
+    ) {
+      need('time_RMC_end', false, 'End time must be after the start time');
+    }
 
     setErrors(found);
     return Object.keys(found).length === 0;
@@ -559,7 +567,11 @@ export function RMCForm({
             id="time_RMC_begin"
             value={text.time_RMC_begin}
             invalid={Boolean(errors.time_RMC_begin)}
-            onChange={(value) => setField('time_RMC_begin', value)}
+            onChange={(value) => {
+              setField('time_RMC_begin', value);
+              // The end-time check keys off this value.
+              clearError('time_RMC_end');
+            }}
           />
         </Field>
       </Card>

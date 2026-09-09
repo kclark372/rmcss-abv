@@ -62,6 +62,21 @@ function formatUSDate(iso: string): string {
   return match ? `${match[2]}/${match[3]}/${match[1]}` : iso;
 }
 
+const LONG_DATE = new Intl.DateTimeFormat('en-US', {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+/** ISO `YYYY-MM-DD` → e.g. `Fri, Sep 18, 2026`, matching the date picker. */
+function formatLongDate(iso: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!match) return iso;
+  const [, y, m, d] = match;
+  return LONG_DATE.format(new Date(Number(y), Number(m) - 1, Number(d)));
+}
+
 /** First word of a "Firstname Lastname" name, for the spoken-script greeting. */
 function firstNameOf(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] ?? '';
@@ -325,6 +340,15 @@ export function RMCForm({
         if (TRANSPORT_NEEDING_PICKUP.includes(text.transport)) {
           need('travel_date', filled(text.travel_date), 'Pick a date');
           need('travel_time', filled(text.travel_time), 'Enter a time');
+          // Pickup is the same day as the intake, so the pickup can't be later
+          // than the intake time. "HH:MM" (24h) compares correctly as strings.
+          if (
+            filled(text.travel_time) &&
+            filled(text.intake_time) &&
+            text.travel_time > text.intake_time
+          ) {
+            need('travel_time', false, 'Pickup time can’t be after the intake time');
+          }
           need('travel_addy', filled(text.travel_addy));
           need('travel_phone', filled(text.travel_phone));
           need('travel_return', filled(text.travel_return));
@@ -411,13 +435,12 @@ export function RMCForm({
     return GOALS.find((g) => g.value === text.goal)?.phrase ?? '';
   }, [text.goal, text.goal_te]);
 
-  // When a pickup transport is chosen, default the pickup date to the intake
-  // date — pickup is usually the same day. Only fills a blank field, so staff
-  // can still set a different pickup day (and a cleared field stays cleared).
+  // Pickup is always the same day as the intake, so keep the (read-only)
+  // pickup date mirrored to the intake date whenever a pickup is needed.
   useEffect(() => {
     if (!TRANSPORT_NEEDING_PICKUP.includes(text.transport)) return;
     setText((prev) =>
-      prev.travel_date || !prev.intake_date
+      prev.travel_date === prev.intake_date
         ? prev
         : { ...prev, travel_date: prev.intake_date },
     );
@@ -861,7 +884,11 @@ export function RMCForm({
                   id="intake_time"
                   value={text.intake_time}
                   invalid={Boolean(errors.intake_time)}
-                  onChange={(value) => setField('intake_time', value)}
+                  onChange={(value) => {
+                    setField('intake_time', value);
+                    // The pickup-time check keys off this value.
+                    clearError('travel_time');
+                  }}
                 />
               </Field>
             </div>
@@ -905,13 +932,15 @@ export function RMCForm({
                   Transportation details
                 </h3>
                 <div className="grid gap-x-4 sm:grid-cols-2">
-                  <Field label="Pickup date" htmlFor="travel_date" required error={errors.travel_date}>
-                    <DatePicker
-                      id="travel_date"
-                      value={text.travel_date}
-                      invalid={Boolean(errors.travel_date)}
-                      onChange={(value) => setField('travel_date', value)}
-                    />
+                  <Field
+                    label="Pickup date"
+                    hint="Always the intake date — change the intake date above if it's wrong."
+                  >
+                    <p className="rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700">
+                      {text.travel_date
+                        ? formatLongDate(text.travel_date)
+                        : 'Set the intake date above'}
+                    </p>
                   </Field>
                   <Field label="Pickup time" htmlFor="travel_time" required error={errors.travel_time}>
                     <TimePicker

@@ -143,7 +143,7 @@ export function Field({
   hint,
   children,
 }: {
-  label: string;
+  label: ReactNode;
   htmlFor?: string;
   required?: boolean;
   error?: string;

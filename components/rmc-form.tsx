@@ -411,6 +411,18 @@ export function RMCForm({
     return GOALS.find((g) => g.value === text.goal)?.phrase ?? '';
   }, [text.goal, text.goal_te]);
 
+  // When a pickup transport is chosen, default the pickup date to the intake
+  // date — pickup is usually the same day. Only fills a blank field, so staff
+  // can still set a different pickup day (and a cleared field stays cleared).
+  useEffect(() => {
+    if (!TRANSPORT_NEEDING_PICKUP.includes(text.transport)) return;
+    setText((prev) =>
+      prev.travel_date || !prev.intake_date
+        ? prev
+        : { ...prev, travel_date: prev.intake_date },
+    );
+  }, [text.transport, text.intake_date]);
+
   function startNewMeeting() {
     setResult(null);
     setSubmitError(null);

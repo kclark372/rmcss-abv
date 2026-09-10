@@ -60,8 +60,9 @@ export const PARTICIPANT_STATUS_OPTIONS = [
 ] as const;
 
 export const TRANSPORT_OPTIONS = [
-  { value: 'self', label: 'Self-transport (skip pickup)' },
-  { value: 'bus', label: 'Bus card (skip pickup)' },
+  { value: 'self', label: 'Self-transport' },
+  { value: 'bus', label: 'Bus card' },
+  { value: 'escort', label: 'Staff escort' },
   { value: 'lyft', label: 'Lyft' },
   { value: 'uber', label: 'Uber' },
   { value: 'lic', label: 'LI-C' },

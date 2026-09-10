@@ -428,10 +428,12 @@ function SectionStep({
           section.title ? (
             <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
               {section.intro}
+              <span className="ml-1 text-red-600">*</span>
             </p>
           ) : (
             <h2 className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
               {section.intro} (check all that apply)
+              <span className="ml-1 text-red-600">*</span>
             </h2>
           )
         ) : null}

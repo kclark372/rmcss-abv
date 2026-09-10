@@ -188,6 +188,11 @@ const selectClass =
   'rounded-md border px-2 py-2 text-sm text-slate-900 shadow-sm ' +
   'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30';
 
+/** Appointments run roughly 7am–6pm, so map a 12-hour value onto that range. */
+function meridiemForHour(hour12: number): 'AM' | 'PM' {
+  return hour12 >= 7 && hour12 <= 11 ? 'AM' : 'PM';
+}
+
 /**
  * A time input built from three selects rather than `<input type="time">`.
  * Minutes step by five, which is all the intake and pickup times need.
@@ -197,30 +202,53 @@ export function TimePicker({
   value,
   onChange,
   invalid,
+  meridiemDefault = 'AM',
 }: {
   id?: string;
   value: string;
   onChange: (value: string) => void;
   invalid?: boolean;
+  /**
+   * Which AM/PM to assume before staff pick one: a fixed side, `'now'` (the
+   * current wall-clock side), or `'by-hour'` (derived from the chosen hour —
+   * 7–11 → AM, 12–6 → PM, for appointment times).
+   */
+  meridiemDefault?: 'AM' | 'PM' | 'now' | 'by-hour';
 }) {
   const fallbackId = useId();
   const groupId = id ?? fallbackId;
   const parts = splitTime(value);
 
-  // Until all three are chosen, default to 9:00 AM so one change is enough.
+  // Until all three are chosen, default to 9:00 so one change is enough.
   const hour = parts?.hour ?? 9;
   const minute = parts?.minute ?? 0;
-  const meridiem = parts?.meridiem ?? 'AM';
+
+  const baseMeridiem: 'AM' | 'PM' =
+    meridiemDefault === 'now'
+      ? new Date().getHours() >= 12
+        ? 'PM'
+        : 'AM'
+      : meridiemDefault === 'by-hour'
+        ? meridiemForHour(hour)
+        : meridiemDefault;
+  const meridiem = parts?.meridiem ?? baseMeridiem;
+
   const timeSelectClass = `${selectClass} ${invalid ? invalidControlClass : validControlClass}`;
 
   function update(next: Partial<{ hour: number; minute: number; meridiem: 'AM' | 'PM' }>) {
-    onChange(
-      joinTime(
-        next.hour ?? hour,
-        next.minute ?? minute,
-        next.meridiem ?? meridiem,
-      ),
-    );
+    let nextMeridiem = next.meridiem ?? meridiem;
+    // In "by-hour" mode, changing the hour re-derives AM/PM — unless staff have
+    // already set an AM/PM the rule wouldn't have picked, which we leave alone.
+    if (
+      meridiemDefault === 'by-hour' &&
+      next.hour !== undefined &&
+      next.meridiem === undefined
+    ) {
+      const overridden =
+        parts != null && parts.meridiem !== meridiemForHour(parts.hour);
+      nextMeridiem = overridden ? meridiem : meridiemForHour(next.hour);
+    }
+    onChange(joinTime(next.hour ?? hour, next.minute ?? minute, nextMeridiem));
   }
 
   return (
@@ -263,13 +291,12 @@ export function TimePicker({
       <select
         aria-label="AM or PM"
         aria-invalid={invalid || undefined}
-        value={parts ? meridiem : ''}
+        value={meridiem}
         onChange={(event) =>
           update({ meridiem: event.target.value as 'AM' | 'PM' })
         }
         className={timeSelectClass}
       >
-        {!parts ? <option value="">--</option> : null}
         <option value="AM">AM</option>
         <option value="PM">PM</option>
       </select>

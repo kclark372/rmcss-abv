@@ -158,6 +158,13 @@ const YES_NO = [
   { value: 'no', label: 'No' },
 ] as const;
 
+/** What contact details the participant can give for a pickup. */
+const TRAVEL_HAS_OPTIONS = [
+  { value: 'address', label: 'Pickup address' },
+  { value: 'phone', label: 'Phone number' },
+  { value: 'both', label: 'Both' },
+] as const;
+
 export function RMCForm({
   rsaUuid,
   onComplete,
@@ -178,6 +185,10 @@ export function RMCForm({
   // the intake date/time and transportation questions are hidden and left
   // blank on the referral record.
   const [apptDate, setApptDate] = useState('');
+
+  // Client-only gate: which pickup contact details the participant can give
+  // ('address' | 'phone' | 'both') — controls which of those two fields show.
+  const [travelHas, setTravelHas] = useState('');
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -249,6 +260,7 @@ export function RMCForm({
     if (value !== 'yes') {
       // Drop any intake/transportation answers so they aren't saved when the
       // appointment isn't booked yet.
+      setTravelHas('');
       setText((prev) => ({
         ...prev,
         intake_date: '',
@@ -263,6 +275,18 @@ export function RMCForm({
         travel_notes: '',
       }));
     }
+  }
+
+  /** Which pickup contact fields to show: 'address' | 'phone' | 'both'. */
+  function setTravelHasAnswer(value: string) {
+    setTravelHas(value);
+    clearError('travel_has');
+    // Clear whichever field this choice hides so a stale value isn't saved.
+    setText((prev) => ({
+      ...prev,
+      travel_addy: value === 'address' || value === 'both' ? prev.travel_addy : '',
+      travel_phone: value === 'phone' || value === 'both' ? prev.travel_phone : '',
+    }));
   }
 
   function setImportant(value: number) {
@@ -353,8 +377,13 @@ export function RMCForm({
             need('travel_time', false, 'Pickup time can’t be after the intake time');
             timeIssues.push('The pickup time can’t be after the intake time.');
           }
-          need('travel_addy', filled(text.travel_addy));
-          need('travel_phone', filled(text.travel_phone));
+          need('travel_has', filled(travelHas), 'Select an option');
+          if (travelHas === 'address' || travelHas === 'both') {
+            need('travel_addy', filled(text.travel_addy));
+          }
+          if (travelHas === 'phone' || travelHas === 'both') {
+            need('travel_phone', filled(text.travel_phone));
+          }
           need('travel_return', filled(text.travel_return));
           // travel_notes is optional.
         }
@@ -476,6 +505,7 @@ export function RMCForm({
     setText(EMPTY_VALUES);
     setFlags(EMPTY_FLAGS);
     setApptDate('');
+    setTravelHas('');
     setImportantValue(null);
     setConfidentValue(null);
   }
@@ -979,32 +1009,51 @@ export function RMCForm({
                     />
                   </Field>
                 </div>
-                <Field label="Pickup address" htmlFor="travel_addy" required error={errors.travel_addy}>
-                  <TextInput
-                    id="travel_addy"
-                    value={text.travel_addy}
-                    invalid={Boolean(errors.travel_addy)}
-                    placeholder="Enter pickup address…"
-                    onChange={(value) => setField('travel_addy', value)}
-                  />
-                </Field>
                 <Field
-                  label="Phone to confirm pickup"
-                  htmlFor="travel_phone"
+                  label="Does the person have:"
+                  htmlFor="travel_has"
                   required
-                  error={errors.travel_phone}
+                  error={errors.travel_has}
                 >
-                  <TextInput
-                    id="travel_phone"
-                    type="tel"
-                    value={text.travel_phone}
-                    invalid={Boolean(errors.travel_phone)}
-                    placeholder="Enter phone number…"
-                    onChange={(value) =>
-                      setField('travel_phone', formatPhoneAsTyped(value))
-                    }
+                  <Select
+                    id="travel_has"
+                    value={travelHas}
+                    invalid={Boolean(errors.travel_has)}
+                    placeholder="Select an option"
+                    options={TRAVEL_HAS_OPTIONS}
+                    onChange={setTravelHasAnswer}
                   />
                 </Field>
+                {travelHas === 'address' || travelHas === 'both' ? (
+                  <Field label="Pickup address" htmlFor="travel_addy" required error={errors.travel_addy}>
+                    <TextInput
+                      id="travel_addy"
+                      value={text.travel_addy}
+                      invalid={Boolean(errors.travel_addy)}
+                      placeholder="Enter pickup address…"
+                      onChange={(value) => setField('travel_addy', value)}
+                    />
+                  </Field>
+                ) : null}
+                {travelHas === 'phone' || travelHas === 'both' ? (
+                  <Field
+                    label="Phone to confirm pickup"
+                    htmlFor="travel_phone"
+                    required
+                    error={errors.travel_phone}
+                  >
+                    <TextInput
+                      id="travel_phone"
+                      type="tel"
+                      value={text.travel_phone}
+                      invalid={Boolean(errors.travel_phone)}
+                      placeholder="Enter phone number…"
+                      onChange={(value) =>
+                        setField('travel_phone', formatPhoneAsTyped(value))
+                      }
+                    />
+                  </Field>
+                ) : null}
                 <Field
                   label="Return location"
                   htmlFor="travel_return"

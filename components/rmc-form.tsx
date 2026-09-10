@@ -296,10 +296,13 @@ export function RMCForm({
 
   /**
    * Every question shown on the form is required. Walks the fields that are
-   * currently on screen and returns whether they are all answered.
+   * currently on screen, sets per-field errors, and returns the found errors
+   * plus a list of the data-consistency problems (bad time order) so the
+   * submit banner can name them instead of saying "answer every question".
    */
-  function validate(): boolean {
+  function validate(): { found: Record<string, string>; timeIssues: string[] } {
     const found: Record<string, string> = {};
+    const timeIssues: string[] = [];
     const filled = (value: string) => value.trim().length > 0;
     const need = (key: string, ok: boolean, message = 'This question is required') => {
       if (!ok) found[key] = message;
@@ -348,6 +351,7 @@ export function RMCForm({
             text.travel_time > text.intake_time
           ) {
             need('travel_time', false, 'Pickup time can’t be after the intake time');
+            timeIssues.push('The pickup time can’t be after the intake time.');
           }
           need('travel_addy', filled(text.travel_addy));
           need('travel_phone', filled(text.travel_phone));
@@ -376,10 +380,11 @@ export function RMCForm({
       text.time_RMC_end <= text.time_RMC_begin
     ) {
       need('time_RMC_end', false, 'End time must be after the start time');
+      timeIssues.push('The meeting end time must be after the start time.');
     }
 
     setErrors(found);
-    return Object.keys(found).length === 0;
+    return { found, timeIssues };
   }
 
   async function handleLookup() {
@@ -403,8 +408,16 @@ export function RMCForm({
   async function handleSubmit() {
     if (!rsa) return;
 
-    if (!validate()) {
-      setSubmitError('Please answer every question before saving.');
+    const { found, timeIssues } = validate();
+    if (Object.keys(found).length > 0) {
+      const missingCount = Object.keys(found).length - timeIssues.length;
+      setSubmitError(
+        timeIssues.length === 0
+          ? 'Please answer every question before saving.'
+          : missingCount > 0
+            ? `${timeIssues.join(' ')} Some other answers are also still missing.`
+            : timeIssues.join(' '),
+      );
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }

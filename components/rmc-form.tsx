@@ -580,6 +580,7 @@ export function RMCForm({
             id="time_RMC_begin"
             value={text.time_RMC_begin}
             invalid={Boolean(errors.time_RMC_begin)}
+            meridiemDefault="now"
             onChange={(value) => {
               setField('time_RMC_begin', value);
               // The end-time check keys off this value.
@@ -909,6 +910,7 @@ export function RMCForm({
                   id="intake_time"
                   value={text.intake_time}
                   invalid={Boolean(errors.intake_time)}
+                  meridiemDefault="by-hour"
                   onChange={(value) => {
                     setField('intake_time', value);
                     // The pickup-time check keys off this value.
@@ -972,6 +974,7 @@ export function RMCForm({
                       id="travel_time"
                       value={text.travel_time}
                       invalid={Boolean(errors.travel_time)}
+                      meridiemDefault="by-hour"
                       onChange={(value) => setField('travel_time', value)}
                     />
                   </Field>
@@ -1110,6 +1113,7 @@ export function RMCForm({
             id="time_RMC_end"
             value={text.time_RMC_end}
             invalid={Boolean(errors.time_RMC_end)}
+            meridiemDefault="now"
             onChange={(value) => setField('time_RMC_end', value)}
           />
         </Field>

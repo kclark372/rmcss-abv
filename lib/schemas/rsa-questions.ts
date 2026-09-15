@@ -217,6 +217,7 @@ export const STAFF_BY_AGENCY = {
     'Anthony Abram',
     'Diana Saavedra',
     'Halina Krupa',
+    'Developer',
   ],
 } as const;
 

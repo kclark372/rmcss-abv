@@ -525,11 +525,8 @@ export function Ruler({
           );
         })}
       </div>
-      <div className="mt-2 grid grid-cols-4 gap-2 text-center text-xs text-slate-500">
+      <div className="mt-2 text-xs text-slate-500">
         <span>Not at all (1)</span>
-        <span>Low (2–3)</span>
-        <span>Moderate (4–6)</span>
-        <span>High (7–10)</span>
       </div>
     </div>
   );

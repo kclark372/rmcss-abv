@@ -137,7 +137,7 @@ export const TALKING_POINTS = {
         ],
       },
       {
-        label: `Low 1-3:`,
+        label: `1-3:`,
         items: [
           `Thank you for being honest`,
           `You’re not alone. Lots of people struggle with [going to treatment, staying in treatment, relapse, not using, etc]`,
@@ -146,7 +146,7 @@ export const TALKING_POINTS = {
         ],
       },
       {
-        label: `Moderate 4-6:`,
+        label: `4-6:`,
         items: [
           `You have a good idea of what you want/need.`,
           `So you’re kind of in between / the middle / right now.`,
@@ -155,7 +155,7 @@ export const TALKING_POINTS = {
         ],
       },
       {
-        label: `High 7-10:`,
+        label: `7-10:`,
         items: [
           `That’s great to hear.`,
           `This is clearly important to you.`,
@@ -188,7 +188,7 @@ export const TALKING_POINTS = {
         ],
       },
       {
-        label: `None/Low 1-3:`,
+        label: `1-3:`,
         items: [
           `Thank you for taking these questions seriously and giving me your honest answer.`,
           `Right now, it's a bit of a blank. That happens. We understand.`,
@@ -201,7 +201,7 @@ export const TALKING_POINTS = {
         ],
       },
       {
-        label: `Moderate 4-6: [Use your hands to show the scale]`,
+        label: `4-6: [Use your hands to show the scale]`,
         items: [
           `So, you’re kind of in between / the middle / right now.`,
           `Go down on the ruler: What puts you at (5-6-7) instead of 1 or 2? Repeat reason`,
@@ -210,7 +210,7 @@ export const TALKING_POINTS = {
         ],
       },
       {
-        label: `High 7-10:`,
+        label: `7-10:`,
         items: [
           `That’s great to hear.`,
           `You’ve got a lot of confidence when it comes to your recovery.`,

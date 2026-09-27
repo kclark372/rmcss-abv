@@ -210,7 +210,7 @@ export type RSAQuestionKey = (typeof RSA_QUESTION_KEYS)[number];
 export const STAFF_BY_AGENCY = {
   COIP: ['Virgen Rodriguez', 'Katrina Ivory', 'Jose Alvarez', 'Lauretta Omale'],
   Haymarket: ['Roger Delhaye', 'Tyrone Baker', 'Angela Butler'],
-  TEECH: ['Karen White', 'DeShara Shells', 'Jamia Puckett', 'Robert Bufford'],
+  TEECH: ['Karen White', 'DeShara Shells', 'Jamia Pickett', 'Robert Bufford'],
   'LI-C': [
     'John Palmer',
     'Keo Jean-Joseph',

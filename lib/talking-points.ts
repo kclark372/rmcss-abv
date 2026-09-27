@@ -24,7 +24,6 @@ export const TALKING_POINTS = {
       {
         items: [
           `Can you tell me more about when …(most recent/severe problem)`,
-          `It looks like you have been using (substance type/frequency of use in past 90 days) please tell me a little bit about your recent use and what you think about it.`,
           `How do you imagine things will be like if you continue using?`,
         ],
       },

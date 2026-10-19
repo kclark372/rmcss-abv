@@ -53,6 +53,18 @@ const FIRST_SECTION_STEP = 2;
 const STEP_DISCUSS = FIRST_SECTION_STEP + RSA_SECTIONS.length; // 10
 const STEP_COMPLETE = STEP_DISCUSS + 1; // 11
 
+/**
+ * The browser's local date and time, as `YYYY-MM-DD` / `YYYY-MM-DDTHH:MM:SS`.
+ * Sent as-is (no timezone) so FileMaker stores the wall-clock time at the desk,
+ * not the server's UTC.
+ */
+function localParts(): { date: string; timestamp: string } {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  return { date, timestamp: `${date}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}` };
+}
+
 const WAVE_OPTIONS = WAVES.map((wave) => ({ value: wave, label: wave }));
 
 export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean }) {
@@ -186,6 +198,7 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
         xsid,
         pid,
         wave,
+        XADT: beganAt ? beganAt.slice(0, 10) : localParts().date,
         timestamp_beginRSA: beganAt,
         discuss_te: discuss,
         ...answers,
@@ -313,7 +326,7 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
             </Button>
             <Button
               onClick={() => {
-                setBeganAt(new Date().toISOString());
+                setBeganAt(localParts().timestamp);
                 goToNextStep(STEP_INTRO);
               }}
             >

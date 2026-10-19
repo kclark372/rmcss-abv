@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { grantAccess, hasAccess, passwordMatches, revokeAccess } from '@/lib/access';
 import { LAYOUTS, withSession } from '@/lib/fm/client';
 import { FMError, type FMFieldData } from '@/lib/fm/types';
-import { toFMBool, toFMTimestamp } from '@/lib/fm/format';
+import { toFMBool, toFMLocalTimestamp } from '@/lib/fm/format';
 import { RSA_QUESTION_KEYS } from '@/lib/schemas/rsa-questions';
 import {
   rsaLinkSubmissionSchema,
@@ -72,13 +72,12 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
     __UUID: randomUUID(),
     XSID: data.xsid,
     _PID: data.pid,
-    // XOBS holds the meeting number (wave). XADT is auto-populated by FileMaker.
+    // XOBS holds the meeting number (wave). XADT is not auto-entered on `rsa`.
+    XADT: data.XADT,
     XOBS: data.wave,
     timeframe: timeframeForWave(data.wave),
     discuss_te: data.discuss_te,
-    timestamp_beginRSA: data.timestamp_beginRSA
-      ? toFMTimestamp(new Date(data.timestamp_beginRSA))
-      : '',
+    timestamp_beginRSA: data.timestamp_beginRSA ? toFMLocalTimestamp(data.timestamp_beginRSA) : '',
   };
 
   for (const key of RSA_QUESTION_KEYS) {

@@ -23,11 +23,15 @@ import {
  * must never be imported into a client component.
  */
 
-/** The three layouts this app writes to. Layout names, not table names. */
+/** The layouts this app uses. Layout names, not table names. */
 export const LAYOUTS = {
   rsa: 'abv_RSA',
   rmc: 'abv_RMC',
   tx: 'abv_tx',
+  /** The new staff-run self-assessment link (`/rsa`) writes to the `rsa` table here. */
+  rsaLink: 'api_rsa',
+  /** Read-only, for the best-effort PID check on the staff-run RSA link. */
+  participants: 'api_pts',
 } as const;
 
 export type LayoutName = (typeof LAYOUTS)[keyof typeof LAYOUTS];

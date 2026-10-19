@@ -19,6 +19,16 @@ Next.js app with two public forms that create records in the FileMaker file
 - `components/ui.tsx` — the shared primitives. Build forms from these rather than
   writing class lists inline, so both forms stay consistent.
 
+- `app/rsa/page.tsx` — the staff-run self-assessment link. Password gate
+  (`RSA_ACCESS_PASSWORD`, `lib/access.ts`), then Staff ID / PID / meeting number,
+  introduction, one section per page, and an "Assessment Complete" screen. It
+  saves one `rsa` record (layout `api_rsa`) and stops — the RMC meeting is opened in FileMaker,
+  which pulls the assessment in. `components/rsa-link-flow.tsx` runs it;
+  `app/actions/rsa-link.ts` holds its server actions. Q2 is skipped when Q1
+  `s1z_none` is checked. Questions use a `{timeframe}` placeholder filled by
+  `lib/schemas/rsa-timeframe.ts` (meeting 1 and 3 → "Since your last
+  assessment", 0/6/9 → "During the past 90 days").
+
 ## FileMaker
 
 Three tables, each with a layout of the same name. The Data API can only read or

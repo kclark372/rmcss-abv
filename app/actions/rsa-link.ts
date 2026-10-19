@@ -104,6 +104,18 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
       };
     }
     console.error('[rsa-link]', error);
+
+    // Setup problems are worth naming; the messages hold variable names only.
+    if (error instanceof Error && error.message.startsWith('Missing FileMaker environment variables')) {
+      return { ok: false, error: `${error.message}. Set them in Vercel for this environment and redeploy.` };
+    }
+    // A failed fetch to FileMaker (wrong host, server down, not reachable from Vercel).
+    if (error instanceof TypeError) {
+      return {
+        ok: false,
+        error: 'Could not reach the FileMaker server. Check FM_SERVER_URL and that the server is reachable from Vercel.',
+      };
+    }
     return { ok: false, error: 'Could not save this assessment. Check the connection and try again.' };
   }
 }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { submitRSA } from '@/app/actions/submit-rsa';
 import { DatePicker } from '@/components/date-time';
+import { applyTimeframe, TIMEFRAME_90_DAYS } from '@/lib/schemas/rsa-timeframe';
 import {
   AGENCIES,
   RSA_INTRODUCTION,
@@ -415,7 +416,9 @@ function SectionStep({
     <>
       {sectionIndex === 0 ? (
         <Card>
-          <p className="text-sm leading-relaxed text-slate-600">{RSA_INTRODUCTION}</p>
+          <p className="text-sm leading-relaxed text-slate-600">
+            {applyTimeframe(RSA_INTRODUCTION, TIMEFRAME_90_DAYS)}
+          </p>
         </Card>
       ) : null}
 
@@ -427,12 +430,12 @@ function SectionStep({
         {section.intro ? (
           section.title ? (
             <p className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
-              {section.intro}
+              {applyTimeframe(section.intro, TIMEFRAME_90_DAYS)}
               <span className="ml-1 text-red-600">*</span>
             </p>
           ) : (
             <h2 className="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
-              {section.intro} (check all that apply)
+              {applyTimeframe(section.intro, TIMEFRAME_90_DAYS)} (check all that apply)
               <span className="ml-1 text-red-600">*</span>
             </h2>
           )

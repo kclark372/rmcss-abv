@@ -47,7 +47,29 @@ npm run dev
 ## Deploying
 
 Built for Vercel. Set the same four variables in the project's environment
-settings. The forms are public and unauthenticated by design.
+settings. The forms at `/` and `/rmc` are public and unauthenticated by design;
+`/rsa` is behind a shared password (`RSA_ACCESS_PASSWORD`).
+
+### Dev and prod
+
+| Site | Branch | URL | FileMaker file |
+| --- | --- | --- | --- |
+| Dev | `dev` | `https://rmcss-abv-git-dev-cricit.vercel.app` | `RMCSS__DEV` |
+| Prod | `main` | `https://rmcss-abv.vercel.app` | the production file |
+
+Work lands on `dev` first and is tested there; `main` is only updated by merging
+`dev` (open a PR from `dev` into `main`).
+
+Vercel only gives a deployment the variables ticked for its environment, so
+set these five in **Settings → Environment Variables**:
+
+- **Production** (`main`): all five, pointing at the production file.
+- **Dev**: add each as a **Preview** variable and scope it to the git branch
+  `dev` (the "Select a branch" option). `FM_DATABASE` is `RMCSS__DEV`, and
+  `RSA_ACCESS_PASSWORD` can differ from production's.
+
+Changing a variable only affects the next deployment, so redeploy after editing.
+For a run on your own machine, put the same five in `.env.local` instead.
 
 ## Notes
 

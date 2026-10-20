@@ -28,10 +28,14 @@ export interface RSASection {
   questions: RSAQuestion[];
 }
 
-/** Shown once at the top of the self-assessment, before section 1. */
+/**
+ * Shown once at the top of the self-assessment, before section 1.
+ * `{timeframe}` (here and in the section intros) is filled in by
+ * `applyTimeframe` — see `rsa-timeframe.ts`.
+ */
 export const RSA_INTRODUCTION =
   'This is a short self-assessment to help you and your linkage manager review ' +
-  'what has been going on in your life during the past 90 days, including today. ' +
+  'what has been going on in your life {timeframe}, including today. ' +
   'Your answers are confidential and will only be used to plan for your services. ' +
   'In this assessment, ‘substances’ and ‘using’ refer to alcohol or drugs, ' +
   'including cannabis and the misuse of prescription medications. Please check all that apply.';
@@ -40,7 +44,7 @@ export const RSA_SECTIONS: RSASection[] = [
   {
     number: 1,
     title: 'Substance Use/Recovery Feedback',
-    intro: 'During the past 90 days, have you used any:',
+    intro: '{timeframe}, have you used any:',
     recapTitle: 'From your RMC self-assessment you said you\'ve been using:',
     questions: [
       { key: 's1a_alcohol', label: 'Beer, wine, mixed drinks or other alcohol', recap: 'beer, wine, mixed drinks or other alcohol' },
@@ -57,7 +61,7 @@ export const RSA_SECTIONS: RSASection[] = [
     // No category heading in the spreadsheet — the question stands alone.
     title: '',
     intro:
-      'Which of the following apply to you when you were using during the past 90 days:',
+      'Which of the following apply to you when you were using {timeframe}:',
     recapTitle: 'And that you\'ve experienced:',
     questions: [
       { key: 's2a_weekly', label: 'Used weekly or more often', recap: 'used weekly or more often' },
@@ -77,7 +81,7 @@ export const RSA_SECTIONS: RSASection[] = [
   {
     number: 3,
     title: 'Treatment participation and recovery support feedback',
-    intro: 'Which of the following apply to you during the past 90 days:',
+    intro: 'Which of the following apply to you {timeframe}:',
     recapTitle: 'Help you have received for your drug and alcohol use',
     questions: [
       { key: 's3a_selfhelp', label: 'Attended self-help or peer support group', recap: 'attended a self-help, peer support, or other recovery support group meeting' },
@@ -152,7 +156,7 @@ export const RSA_SECTIONS: RSASection[] = [
   {
     number: 7,
     title: 'Legal System Status',
-    intro: 'Which of the following apply to you during the past 90 days?',
+    intro: 'Which of the following apply to you {timeframe}?',
     recapTitle: 'Legal Status',
     questions: [
       { key: 's7a_arrest', label: 'Arrested 1 or more times', recap: 'arrested 1 or more times' },
@@ -168,7 +172,7 @@ export const RSA_SECTIONS: RSASection[] = [
   {
     number: 8,
     title: 'Housing Status',
-    intro: 'Which of the following apply to you during the past 90 days?',
+    intro: 'Which of the following apply to you {timeframe}?',
     recapTitle: 'Housing Status',
     // NOTE: abv_RSA has no `s8z_none` field, so section 8 has no "none" option.
     // If one is wanted, add the field in FileMaker and put it on the layout first.

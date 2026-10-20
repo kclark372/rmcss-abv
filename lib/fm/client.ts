@@ -23,11 +23,15 @@ import {
  * must never be imported into a client component.
  */
 
-/** The three layouts this app writes to. Layout names, not table names. */
+/** The layouts this app uses. Layout names, not table names. */
 export const LAYOUTS = {
   rsa: 'abv_RSA',
   rmc: 'abv_RMC',
   tx: 'abv_tx',
+  /** The new staff-run self-assessment link (`/rsa`) writes to the `rsa` table here. */
+  rsaLink: 'api_rsa',
+  /** Read-only, for the best-effort PID check on the staff-run RSA link. */
+  participants: 'api_pts',
 } as const;
 
 export type LayoutName = (typeof LAYOUTS)[keyof typeof LAYOUTS];
@@ -51,10 +55,23 @@ function readConfig(): FMConfig {
     !database && 'FM_DATABASE',
     !username && 'FM_API_USERNAME',
     !password && 'FM_API_PASSWORD',
-  ].filter(Boolean);
+  ].filter((name): name is string => Boolean(name));
 
   if (missing.length > 0) {
-    throw new Error(`Missing FileMaker environment variables: ${missing.join(', ')}`);
+    // Say whether each is absent or set-but-empty, and which Vercel deployment
+    // answered — enough to tell a wrong-scope variable from a stale build.
+    // Names and states only, never values.
+    const state = missing.map((name) => `${name} (${name in process.env ? 'empty' : 'not set'})`);
+    const where = [
+      process.env.VERCEL_ENV,
+      process.env.VERCEL_GIT_COMMIT_REF,
+      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7),
+    ]
+      .filter(Boolean)
+      .join(' / ');
+    throw new Error(
+      `Missing FileMaker environment variables: ${state.join(', ')}${where ? ` [served by ${where}]` : ''}`,
+    );
   }
 
   // Tolerate a value pasted with or without a scheme or a trailing slash.

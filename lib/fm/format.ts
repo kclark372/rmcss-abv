@@ -65,3 +65,16 @@ export function toFMBool(checked: boolean): '1' | '0' {
 export function fromFMBool(value: string | undefined): boolean {
   return value === '1';
 }
+
+/**
+ * `YYYY-MM-DDTHH:MM:SS` (browser-local, no timezone) -> `MM/DD/YYYY HH:MM:SS`.
+ * Unlike `toFMTimestamp` this does no `Date` conversion, so a server running in
+ * UTC (Vercel) cannot shift the wall-clock time.
+ */
+export function toFMLocalTimestamp(local: string | null | undefined): string {
+  if (!local) return '';
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2}:\d{2})$/.exec(local);
+  if (!match) return '';
+  const [, year, month, day, time] = match;
+  return `${month}/${day}/${year} ${time}`;
+}

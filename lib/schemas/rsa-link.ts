@@ -30,8 +30,6 @@ const answers = z.object(
 export const rsaLinkSubmissionSchema = staffEntrySchema
   .extend({
     discuss_te: z.string().trim().max(5000).default(''),
-    /** Assessment date as `YYYY-MM-DD`; `rsa::XADT` is a text field. */
-    XADT: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     /** Browser-local `YYYY-MM-DDTHH:MM:SS`, with no timezone on purpose. */
     timestamp_beginRSA: z
       .string()

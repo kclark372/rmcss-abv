@@ -72,8 +72,7 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
     __UUID: randomUUID(),
     XSID: data.xsid,
     _PID: data.pid,
-    // XOBS holds the meeting number (wave). XADT is not auto-entered on `rsa`.
-    XADT: data.XADT,
+    // XOBS holds the meeting number (wave). XADT is set by FileMaker on creation.
     XOBS: data.wave,
     timeframe: timeframeForWave(data.wave),
     discuss_te: data.discuss_te,

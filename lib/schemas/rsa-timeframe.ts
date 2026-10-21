@@ -32,3 +32,20 @@ export function applyTimeframe(text: string, timeframe: string): string {
     return startsSentence ? timeframe : timeframe.charAt(0).toLowerCase() + timeframe.slice(1);
   });
 }
+
+/**
+ * Reads the participant's current meeting from `participants::wave_now_rmc`,
+ * which holds a label such as "Enrollment", "Month 3" or "M3".
+ * "Enrollment" (or "baseline") is meeting 0; otherwise the first number in the
+ * label is the meeting. Anything that is not one of `WAVES` returns null, so an
+ * unfamiliar label stops the form instead of being guessed at.
+ */
+export function waveFromLabel(label: string | null | undefined): Wave | null {
+  const text = (label ?? '').trim().toLowerCase();
+  if (!text) return null;
+  if (/^(enrol+ment|baseline)$/.test(text)) return '0';
+  const number = /\d+/.exec(text)?.[0];
+  if (number === undefined) return null;
+  const wave = String(Number(number));
+  return (WAVES as readonly string[]).includes(wave) ? (wave as Wave) : null;
+}

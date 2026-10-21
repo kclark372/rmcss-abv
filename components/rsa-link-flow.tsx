@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { checkPid, loadRoster, lock, submitLinkAssessment, unlock } from '@/app/actions/rsa-link';
+import { checkPid, loadRoster, submitLinkAssessment, unlock } from '@/app/actions/rsa-link';
 import {
   Alert,
   Button,
@@ -130,14 +130,20 @@ export function RSALinkFlow({
     setSubmitError(null);
   }
 
+  /**
+   * Close: sign out and go back to the password screen. That is the safe place to
+   * leave a shared tablet, and it needs no `window.close()`, which browsers
+   * ignore for tabs the page did not open itself.
+   */
   async function handleClose() {
-    await lock();
+    try {
+      await fetch('/rsa/lock', { method: 'POST' });
+    } catch {
+      // Offline: still lock the screen. The cookie expires on its own.
+    }
     resetEverything();
     setRoster(null);
     setUnlocked(false);
-    // Only works if this tab was opened by a script; otherwise the locked
-    // screen stays up, which is the safe place to leave a shared tablet.
-    window.close();
   }
 
   async function refreshRoster() {

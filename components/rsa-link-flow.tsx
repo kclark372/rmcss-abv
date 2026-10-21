@@ -26,7 +26,7 @@ import {
   RSA_SECTIONS,
   type RSAQuestionKey,
 } from '@/lib/schemas/rsa-questions';
-import { applyTimeframe, timeframeForWave, WAVES, type Wave } from '@/lib/schemas/rsa-timeframe';
+import { applyTimeframe, timeframeForWave, type Wave } from '@/lib/schemas/rsa-timeframe';
 
 /**
  * The staff-run self-assessment link (`/rsa`).
@@ -65,6 +65,20 @@ function localTimestamp(): string {
   return `${date}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }
 
+/** What staff see when the PID check does not let them continue. */
+function pidProblem(result: Exclude<Awaited<ReturnType<typeof checkPid>>, { status: 'found' }>, pid: string): string {
+  switch (result.status) {
+    case 'not_found':
+      return `PID ${pid} was not found. Check the number and try again.`;
+    case 'no_wave':
+      return `No RMC meeting is open for PID ${pid} right now.`;
+    case 'bad_wave':
+      return `PID ${pid} is set to the meeting "${result.waveLabel}", which this form does not recognise. Contact the data team.`;
+    case 'unknown':
+      return 'Could not verify this PID right now. Try again in a moment.';
+  }
+}
+
 function agencyOptions(roster: readonly StaffMember[]) {
   return [...new Set(roster.map((member) => member.agency))].map((name) => ({ value: name, label: name }));
 }
@@ -74,8 +88,6 @@ function staffOptions(roster: readonly StaffMember[], agency: string) {
     .filter((member) => member.agency === agency)
     .map((member) => ({ value: member.xsid, label: member.name }));
 }
-
-const WAVE_OPTIONS = WAVES.map((wave) => ({ value: wave, label: wave }));
 
 export function RSALinkFlow({
   initiallyUnlocked,
@@ -92,7 +104,8 @@ export function RSALinkFlow({
   const [agency, setAgency] = useState('');
   const [xsid, setXsid] = useState('');
   const [pid, setPid] = useState('');
-  const [wave, setWave] = useState('');
+  /** The meeting FileMaker says is open for this PID; set only by a successful PID check. */
+  const [wave, setWave] = useState<Wave | null>(null);
   const [entryErrors, setEntryErrors] = useState<Record<string, string>>({});
   const [isChecking, setIsChecking] = useState(false);
 
@@ -102,14 +115,14 @@ export function RSALinkFlow({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const timeframe = timeframeForWave((wave || '0') as Wave);
+  const timeframe = timeframeForWave(wave ?? '0');
 
   function resetEverything() {
     setStep(STEP_ENTRY);
     setAgency('');
     setXsid('');
     setPid('');
-    setWave('');
+    setWave(null);
     setEntryErrors({});
     setAnswers(EMPTY_ANSWERS);
     setDiscuss('');
@@ -154,7 +167,7 @@ export function RSALinkFlow({
   /* ---------------------------------------------------------------------- */
 
   async function handleBegin() {
-    const parsed = staffEntrySchema.safeParse({ agency, xsid, pid, wave });
+    const parsed = staffEntrySchema.safeParse({ agency, xsid, pid });
     if (!parsed.success) {
       const found: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
@@ -166,25 +179,22 @@ export function RSALinkFlow({
     }
     setEntryErrors({});
 
-    // Hard stop: only a PID that FileMaker confirms lets staff continue.
+    // Hard stop: only a PID that FileMaker confirms, with a meeting open, goes on.
     setIsChecking(true);
     let result: Awaited<ReturnType<typeof checkPid>>;
     try {
       result = await checkPid(parsed.data.pid);
     } catch {
-      result = 'unknown';
+      result = { status: 'unknown' };
     }
     setIsChecking(false);
 
-    if (result === 'not_found') {
-      setEntryErrors({ pid: `PID ${parsed.data.pid} was not found. Check the number and try again.` });
-      return;
-    }
-    if (result === 'unknown') {
-      setEntryErrors({ pid: 'Could not verify this PID right now. Try again in a moment.' });
+    if (result.status !== 'found') {
+      setEntryErrors({ pid: pidProblem(result, parsed.data.pid) });
       return;
     }
 
+    setWave(result.wave);
     setStep(STEP_INTRO);
   }
 
@@ -242,7 +252,6 @@ export function RSALinkFlow({
         agency,
         xsid,
         pid,
-        wave,
         timestamp_beginRSA: beganAt,
         discuss_te: discuss,
         ...answers,
@@ -349,17 +358,6 @@ export function RSALinkFlow({
                       setPid(value);
                       setEntryErrors(({ pid: _cleared, ...rest }) => rest);
                     }}
-                  />
-                </Field>
-
-                <Field label="Meeting number" htmlFor="wave" required error={entryErrors.wave}>
-                  <Select
-                    id="wave"
-                    value={wave}
-                    invalid={Boolean(entryErrors.wave)}
-                    placeholder="Select a meeting number"
-                    options={WAVE_OPTIONS}
-                    onChange={setWave}
                   />
                 </Field>
               </>

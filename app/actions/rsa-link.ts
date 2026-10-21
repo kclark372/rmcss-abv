@@ -14,7 +14,7 @@ import {
   type RSALinkSubmitResult,
   type StaffMember,
 } from '@/lib/schemas/rsa-link';
-import { timeframeForWave } from '@/lib/schemas/rsa-timeframe';
+import { timeframeForWave, waveFromLabel } from '@/lib/schemas/rsa-timeframe';
 
 /**
  * Server actions behind the staff-run self-assessment link (`/rsa`).
@@ -83,24 +83,32 @@ export async function loadRoster(): Promise<RosterResult> {
   }
 }
 
-async function pidExists(session: FMSession, pid: string): Promise<boolean> {
-  const matches = await session.find(LAYOUTS.participants, [{ pid: `==${pid}` }], 1);
-  return matches.length > 0;
+/** Looks the PID up and reads which meeting is open for it (`wave_now_rmc`). */
+async function lookupWave(session: FMSession, pid: string): Promise<PidCheckResult> {
+  const [participant] = await session.find(LAYOUTS.participants, [{ pid: `==${pid}` }], 1);
+  if (!participant) return { status: 'not_found' };
+
+  const waveLabel = participant.fieldData.wave_now_rmc?.trim() ?? '';
+  if (!waveLabel) return { status: 'no_wave' };
+
+  const wave = waveFromLabel(waveLabel);
+  return wave ? { status: 'found', wave, waveLabel } : { status: 'bad_wave', waveLabel };
 }
 
 /**
- * Checks a PID against the participants layout. This is a hard stop: anything
- * other than `found` (including a failed lookup) keeps staff on the entry screen.
+ * Checks a PID against the participants layout and reads its current meeting.
+ * A hard stop: anything other than `found` (including a failed lookup) keeps
+ * staff on the entry screen.
  */
 export async function checkPid(pid: unknown): Promise<PidCheckResult> {
-  if (!(await hasAccess())) return 'unknown';
-  if (typeof pid !== 'string' || !/^\d{1,9}$/.test(pid)) return 'not_found';
+  if (!(await hasAccess())) return { status: 'unknown' };
+  if (typeof pid !== 'string' || !/^\d{1,9}$/.test(pid)) return { status: 'not_found' };
 
   try {
-    return (await withSession((session) => pidExists(session, pid))) ? 'found' : 'not_found';
+    return await withSession((session) => lookupWave(session, pid));
   } catch (error) {
     console.error('[rsa-link] PID check failed:', error);
-    return 'unknown';
+    return { status: 'unknown' };
   }
 }
 
@@ -119,9 +127,8 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
   const fieldData: FMFieldData = {
     __UUID: randomUUID(),
     _PID: data.pid,
-    // XOBS holds the meeting number (wave). XADT is set by FileMaker on creation.
-    XOBS: data.wave,
-    timeframe: timeframeForWave(data.wave),
+    // XADT is set by FileMaker on creation. XOBS and timeframe come from the
+    // participant's current meeting, read below.
     discuss_te: data.discuss_te,
     timestamp_beginRSA: data.timestamp_beginRSA ? toFMLocalTimestamp(data.timestamp_beginRSA) : '',
   };
@@ -144,10 +151,15 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
       const [staffRecord] = await session.find(LAYOUTS.staff, [{ xsid: `==${data.xsid}` }], 1);
       const staff = staffRecord ? toStaffMember(staffRecord.fieldData) : null;
       if (!staff || staff.agency !== data.agency) return 'bad_staff' as const;
-      if (!(await pidExists(session, data.pid))) return 'bad_pid' as const;
+      const meeting = await lookupWave(session, data.pid);
+      if (meeting.status !== 'found') return meeting;
 
       await session.createRecord(LAYOUTS.rsaLink, {
         ...fieldData,
+        // XOBS keeps the label exactly as wave_now_rmc holds it, so the RSA and
+        // the RMC always carry the same value.
+        XOBS: meeting.waveLabel,
+        timeframe: timeframeForWave(meeting.wave),
         agency: staff.agency,
         name_pref_full_staff: staff.name,
         XSID: staff.xsid,
@@ -158,10 +170,17 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
     if (outcome === 'bad_staff') {
       return { ok: false, error: 'That staff member was not found. Go back and choose again.' };
     }
-    if (outcome === 'bad_pid') {
+    if (outcome === 'saved') return { ok: true };
+    if (outcome.status === 'not_found') {
       return { ok: false, error: 'That PID was not found. Go back and check it.' };
     }
-    return { ok: true };
+    if (outcome.status === 'no_wave') {
+      return { ok: false, error: 'No RMC meeting is open for this PID right now.' };
+    }
+    return {
+      ok: false,
+      error: `This PID's meeting "${outcome.status === 'bad_wave' ? outcome.waveLabel : ''}" is not one this form recognises.`,
+    };
   } catch (error) {
     if (error instanceof FMError) {
       console.error(`[rsa-link] FileMaker ${error.code}: ${error.message}`);

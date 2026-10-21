@@ -20,14 +20,21 @@ Next.js app with two public forms that create records in the FileMaker file
   writing class lists inline, so both forms stay consistent.
 
 - `app/rsa/page.tsx` — the staff-run self-assessment link. Password gate
-  (`RSA_ACCESS_PASSWORD`, `lib/access.ts`), then Staff ID / PID / meeting number,
-  introduction, one section per page, and an "Assessment Complete" screen. It
-  saves one `rsa` record (layout `api_rsa`) and stops — the RMC meeting is opened in FileMaker,
-  which pulls the assessment in. `components/rsa-link-flow.tsx` runs it;
-  `app/actions/rsa-link.ts` holds its server actions. Q2 is skipped when Q1
-  `s1z_none` is checked. Questions use a `{timeframe}` placeholder filled by
-  `lib/schemas/rsa-timeframe.ts` (meeting 1 and 3 → "Since your last
-  assessment", 0/6/9 → "During the past 90 days").
+  (`RSA_ACCESS_PASSWORD`, `lib/access.ts`), then Organization / Staff name (from
+  `staff` via `api_staff`) / PID, introduction, one section per page, and an
+  "Assessment Complete" screen. It saves one `rsa` record (layout `api_rsa`) and
+  stops — the RMC meeting is opened in FileMaker, which pulls the assessment in.
+  `components/rsa-link-flow.tsx` runs it; `app/actions/rsa-link.ts` holds its
+  server actions. Q2 is skipped when Q1 `s1z_none` is checked.
+  - **The PID is a hard stop.** It must exist in `participants` (`api_pts`) and
+    have a meeting open. The meeting is never entered by staff: it is read from
+    `participants::wave_now_rmc` (a text label such as "Enrollment" or "Month 3",
+    set by the daily update script) and re-read on the server when saving.
+    `waveFromLabel` in `lib/schemas/rsa-timeframe.ts` turns the label into 0, 1,
+    3, 6 or 9; an unrecognised label stops the form.
+  - Saved as `XOBS` = the label exactly as `wave_now_rmc` holds it, and
+    `timeframe` = "Since your last assessment" (meetings 1, 3) or "During the past
+    90 days" (0, 6, 9). Questions use a `{timeframe}` placeholder.
 
 ## FileMaker
 

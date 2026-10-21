@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
 import { RSA_QUESTION_KEYS } from './rsa-questions';
-import { WAVES } from './rsa-timeframe';
+import type { Wave } from './rsa-timeframe';
 
 /**
  * Validation for the staff-run self-assessment link (`/rsa`).
  *
- * Staff pick their organization and name, type the PID and pick the meeting
- * number; the participant supplies the
- * answers. The server re-validates everything — client checks are for feedback.
+ * Staff pick their organization and name and type the PID; the meeting comes
+ * from FileMaker (`participants::wave_now_rmc`), never from the browser. The
+ * participant supplies the answers. The server re-validates everything — client checks are for feedback.
  */
 
 export const staffEntrySchema = z.object({
@@ -26,8 +26,6 @@ export const staffEntrySchema = z.object({
     .min(1, 'PID is required')
     .regex(/^\d{1,9}$/, 'PID must be numbers only')
     .transform((value) => String(Number(value))),
-  /** Meeting number; written to `rsa::XOBS`. */
-  wave: z.enum(WAVES, { message: 'Meeting number is required' }),
 });
 
 export type StaffEntry = z.infer<typeof staffEntrySchema>;
@@ -67,8 +65,17 @@ export type RosterResult =
   | { ok: false; error: string };
 
 /**
- * `found` / `not_found` come from FileMaker. `unknown` means the lookup could
- * not be done (layout not readable, server unreachable…). All but `found` stop
- * staff from continuing: a PID that cannot be verified is not a valid PID.
+ * The PID check. Only `found` lets staff continue; every other status is a hard
+ * stop. `found` also carries the meeting read from `wave_now_rmc`: `waveLabel` is
+ * the value as FileMaker holds it and `wave` is the meeting number it means.
  */
-export type PidCheckResult = 'found' | 'not_found' | 'unknown';
+export type PidCheckResult =
+  | { status: 'found'; wave: Wave; waveLabel: string }
+  /** No participant has this PID. */
+  | { status: 'not_found' }
+  /** The participant exists but `wave_now_rmc` is empty: no meeting is open. */
+  | { status: 'no_wave' }
+  /** `wave_now_rmc` holds a label this form does not recognise. */
+  | { status: 'bad_wave'; waveLabel: string }
+  /** The lookup itself failed (layout not readable, server unreachable…). */
+  | { status: 'unknown' };

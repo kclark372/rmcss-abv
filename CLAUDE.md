@@ -28,12 +28,12 @@ Next.js app with two public forms that create records in the FileMaker file
   server actions. Q2 is skipped when Q1 `s1z_none` is checked.
   - **The PID is a hard stop.** It must exist in `participants` (`api_pts`) and
     have a meeting open. The meeting is never entered by staff: it is read from
-    `participants::wave_now_rmc` (a text label such as "Enrollment" or "Month 3",
+    `participants::wave_now_rmc` (a text label: Enrollment, M1, M3, M6 or M9,
     set by the daily update script) and re-read on the server when saving.
     `waveFromLabel` in `lib/schemas/rsa-timeframe.ts` turns the label into 0, 1,
     3, 6 or 9; an unrecognised label stops the form.
-  - Saved as `XOBS` = the label exactly as `wave_now_rmc` holds it, and
-    `timeframe` = "Since your last assessment" (meetings 1, 3) or "During the past
+  - Saved as `XOBS` = the meeting number (0, 1, 3, 6 or 9; staff see it as
+    Enrollment, M1, M3, M6, M9), and `timeframe` = "Since your last assessment" (meetings 1, 3) or "During the past
     90 days" (0, 6, 9). Questions use a `{timeframe}` placeholder.
 
 ## FileMaker

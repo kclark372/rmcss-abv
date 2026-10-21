@@ -2,7 +2,7 @@
 
 import { randomUUID } from 'node:crypto';
 
-import { grantAccess, hasAccess, passwordMatches, revokeAccess } from '@/lib/access';
+import { grantAccess, hasAccess, passwordMatches } from '@/lib/access';
 import { LAYOUTS, withSession, type FMSession } from '@/lib/fm/client';
 import { FMError, type FMFieldData } from '@/lib/fm/types';
 import { toFMBool, toFMLocalTimestamp } from '@/lib/fm/format';
@@ -30,11 +30,6 @@ export async function unlock(password: unknown): Promise<{ ok: boolean; error?: 
   }
   await grantAccess();
   return { ok: true };
-}
-
-/** Signs this tablet out. */
-export async function lock(): Promise<void> {
-  await revokeAccess();
 }
 
 const MAX_ROSTER = 500;

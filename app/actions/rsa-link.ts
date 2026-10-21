@@ -156,9 +156,9 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
 
       await session.createRecord(LAYOUTS.rsaLink, {
         ...fieldData,
-        // XOBS keeps the label exactly as wave_now_rmc holds it, so the RSA and
-        // the RMC always carry the same value.
-        XOBS: meeting.waveLabel,
+        // XOBS holds the meeting number (0, 1, 3, 6 or 9). Staff see it as the
+        // label in wave_now_rmc ("Enrollment", "M1", "M3", …).
+        XOBS: meeting.wave,
         timeframe: timeframeForWave(meeting.wave),
         agency: staff.agency,
         name_pref_full_staff: staff.name,

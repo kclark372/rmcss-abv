@@ -30,8 +30,9 @@ export const LAYOUTS = {
   tx: 'abv_tx',
   /** The new staff-run self-assessment link (`/rsa`) writes to the `rsa` table here. */
   rsaLink: 'api_rsa',
-  /** Read-only, for the best-effort PID check on the staff-run RSA link. */
+  /** Read-only: the PID check and the staff dropdowns on the staff-run RSA link. */
   participants: 'api_pts',
+  staff: 'api_staff',
 } as const;
 
 export type LayoutName = (typeof LAYOUTS)[keyof typeof LAYOUTS];

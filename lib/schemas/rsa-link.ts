@@ -1,22 +1,31 @@
 import { z } from 'zod';
 
 import { RSA_QUESTION_KEYS } from './rsa-questions';
-import { WAVES } from './rsa-timeframe';
+import type { Wave } from './rsa-timeframe';
 
 /**
  * Validation for the staff-run self-assessment link (`/rsa`).
  *
- * Staff supply Staff ID, PID and meeting number; the participant supplies the
- * answers. The server re-validates everything — client checks are for feedback.
+ * Staff pick their organization and name and type the PID; the meeting comes
+ * from FileMaker (`participants::wave_now_rmc`), never from the browser. The
+ * participant supplies the answers. The server re-validates everything — client checks are for feedback.
  */
 
 export const staffEntrySchema = z.object({
-  /** Free text; written to `rsa::XSID`. */
-  xsid: z.string().trim().min(1, 'Staff ID is required').max(50),
-  /** Written to `rsa::_PID` (a text field). */
-  pid: z.string().trim().regex(/^\d{1,9}$/, 'PID must be numbers only'),
-  /** Meeting number; written to `rsa::XOBS`. */
-  wave: z.enum(WAVES, { message: 'Meeting number is required' }),
+  /** Written to `rsa::agency`. Must match the chosen staff member's agency. */
+  agency: z.string().trim().min(1, 'Organization is required').max(100),
+  /** The chosen staff member's `staff::xsid`; written to `rsa::XSID`. */
+  xsid: z
+    .string()
+    .trim()
+    .regex(/^[\w.-]{1,50}$/, 'Staff name is required'),
+  /** Written to `rsa::_PID` (a text field), without leading zeros. */
+  pid: z
+    .string()
+    .trim()
+    .min(1, 'PID is required')
+    .regex(/^\d{1,9}$/, 'PID must be numbers only')
+    .transform((value) => String(Number(value))),
 });
 
 export type StaffEntry = z.infer<typeof staffEntrySchema>;
@@ -44,9 +53,29 @@ export type RSALinkSubmitResult =
   | { ok: true }
   | { ok: false; error: string; locked?: boolean };
 
+/** One person in the staff dropdowns, from `staff` (layout `api_staff`). */
+export interface StaffMember {
+  agency: string;
+  name: string;
+  xsid: string;
+}
+
+export type RosterResult =
+  | { ok: true; roster: StaffMember[] }
+  | { ok: false; error: string };
+
 /**
- * `found` / `not_found` come from FileMaker. `unknown` means the lookup could
- * not be done (layout missing, server unreachable…) — staff are never blocked
- * on it.
+ * The PID check. Only `found` lets staff continue; every other status is a hard
+ * stop. `found` also carries the meeting read from `wave_now_rmc`: `waveLabel` is
+ * the value as FileMaker holds it and `wave` is the meeting number it means.
  */
-export type PidCheckResult = 'found' | 'not_found' | 'unknown';
+export type PidCheckResult =
+  | { status: 'found'; wave: Wave; waveLabel: string }
+  /** No participant has this PID. */
+  | { status: 'not_found' }
+  /** The participant exists but `wave_now_rmc` is empty: no meeting is open. */
+  | { status: 'no_wave' }
+  /** `wave_now_rmc` holds a label this form does not recognise. */
+  | { status: 'bad_wave'; waveLabel: string }
+  /** The lookup itself failed (layout not readable, server unreachable…). */
+  | { status: 'unknown' };

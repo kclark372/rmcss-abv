@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { checkPid, lock, submitLinkAssessment, unlock } from '@/app/actions/rsa-link';
+import { checkPid, loadRoster, submitLinkAssessment, unlock } from '@/app/actions/rsa-link';
 import {
   Alert,
   Button,
@@ -19,20 +19,21 @@ import {
   TextArea,
   TextInput,
 } from '@/components/ui';
-import { staffEntrySchema } from '@/lib/schemas/rsa-link';
+import { staffEntrySchema, type RosterResult, type StaffMember } from '@/lib/schemas/rsa-link';
 import {
   RSA_INTRODUCTION,
   RSA_QUESTION_KEYS,
   RSA_SECTIONS,
   type RSAQuestionKey,
 } from '@/lib/schemas/rsa-questions';
-import { applyTimeframe, timeframeForWave, WAVES, type Wave } from '@/lib/schemas/rsa-timeframe';
+import { applyTimeframe, timeframeForWave, type Wave } from '@/lib/schemas/rsa-timeframe';
 
 /**
  * The staff-run self-assessment link (`/rsa`).
  *
- * Staff unlock it with a shared password, enter Staff ID / PID / meeting
- * number, and hand the tablet to the participant, who sees the introduction and
+ * Staff unlock it with a shared password, pick their organization and name,
+ * type the participant's PID (which must exist in FileMaker) and pick the
+ * meeting number, then hand the tablet to the participant, who sees the introduction and
  * then one question per page. After the last question the answers are saved and
  * a "give the tablet to staff" screen ends the flow. The RMC meeting is opened
  * separately in FileMaker, which pulls the saved assessment in.
@@ -64,17 +65,48 @@ function localTimestamp(): string {
   return `${date}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }
 
-const WAVE_OPTIONS = WAVES.map((wave) => ({ value: wave, label: wave }));
+/** What staff see when the PID check does not let them continue. */
+function pidProblem(result: Exclude<Awaited<ReturnType<typeof checkPid>>, { status: 'found' }>, pid: string): string {
+  switch (result.status) {
+    case 'not_found':
+      return `PID ${pid} was not found. Check the number and try again.`;
+    case 'no_wave':
+      return `No RMC meeting is open for PID ${pid} right now.`;
+    case 'bad_wave':
+      return `PID ${pid} is set to the meeting "${result.waveLabel}", which this form does not recognise. Contact the data team.`;
+    case 'unknown':
+      return 'Could not verify this PID right now. Try again in a moment.';
+  }
+}
 
-export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean }) {
+function agencyOptions(roster: readonly StaffMember[]) {
+  return [...new Set(roster.map((member) => member.agency))].map((name) => ({ value: name, label: name }));
+}
+
+function staffOptions(roster: readonly StaffMember[], agency: string) {
+  return roster
+    .filter((member) => member.agency === agency)
+    .map((member) => ({ value: member.xsid, label: member.name }));
+}
+
+export function RSALinkFlow({
+  initiallyUnlocked,
+  initialRoster,
+}: {
+  initiallyUnlocked: boolean;
+  initialRoster: RosterResult | null;
+}) {
   const [unlocked, setUnlocked] = useState(initiallyUnlocked);
+  const [roster, setRoster] = useState<RosterResult | null>(initialRoster);
+  const [isLoadingRoster, setIsLoadingRoster] = useState(false);
 
   const [step, setStep] = useState(STEP_ENTRY);
+  const [agency, setAgency] = useState('');
   const [xsid, setXsid] = useState('');
   const [pid, setPid] = useState('');
-  const [wave, setWave] = useState('');
+  /** The meeting FileMaker says is open for this PID; set only by a successful PID check. */
+  const [wave, setWave] = useState<Wave | null>(null);
   const [entryErrors, setEntryErrors] = useState<Record<string, string>>({});
-  const [pidWarning, setPidWarning] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
   const [answers, setAnswers] = useState<Answers>(EMPTY_ANSWERS);
@@ -83,32 +115,57 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const timeframe = timeframeForWave((wave || '0') as Wave);
+  const timeframe = timeframeForWave(wave ?? '0');
 
   function resetEverything() {
     setStep(STEP_ENTRY);
+    setAgency('');
     setXsid('');
     setPid('');
-    setWave('');
+    setWave(null);
     setEntryErrors({});
-    setPidWarning(false);
     setAnswers(EMPTY_ANSWERS);
     setDiscuss('');
     setBeganAt(null);
     setSubmitError(null);
   }
 
+  /**
+   * Close: sign out and go back to the password screen. That is the safe place to
+   * leave a shared tablet, and it needs no `window.close()`, which browsers
+   * ignore for tabs the page did not open itself.
+   */
   async function handleClose() {
-    await lock();
+    try {
+      await fetch('/rsa/lock', { method: 'POST' });
+    } catch {
+      // Offline: still lock the screen. The cookie expires on its own.
+    }
     resetEverything();
+    setRoster(null);
     setUnlocked(false);
-    // Only works if this tab was opened by a script; otherwise the locked
-    // screen stays up, which is the safe place to leave a shared tablet.
-    window.close();
+  }
+
+  async function refreshRoster() {
+    setIsLoadingRoster(true);
+    try {
+      setRoster(await loadRoster());
+    } catch {
+      setRoster({ ok: false, error: 'Could not reach the server. Try again.' });
+    } finally {
+      setIsLoadingRoster(false);
+    }
   }
 
   if (!unlocked) {
-    return <PasswordGate onUnlocked={() => setUnlocked(true)} />;
+    return (
+      <PasswordGate
+        onUnlocked={async () => {
+          setUnlocked(true);
+          await refreshRoster();
+        }}
+      />
+    );
   }
 
   /* ---------------------------------------------------------------------- */
@@ -116,7 +173,7 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
   /* ---------------------------------------------------------------------- */
 
   async function handleBegin() {
-    const parsed = staffEntrySchema.safeParse({ xsid, pid, wave });
+    const parsed = staffEntrySchema.safeParse({ agency, xsid, pid });
     if (!parsed.success) {
       const found: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
@@ -128,18 +185,22 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
     }
     setEntryErrors({});
 
-    // Best-effort: a PID we cannot find warns once, then staff can continue.
-    if (!pidWarning) {
-      setIsChecking(true);
-      const result = await checkPid(parsed.data.pid);
-      setIsChecking(false);
-      if (result === 'not_found') {
-        setPidWarning(true);
-        return;
-      }
+    // Hard stop: only a PID that FileMaker confirms, with a meeting open, goes on.
+    setIsChecking(true);
+    let result: Awaited<ReturnType<typeof checkPid>>;
+    try {
+      result = await checkPid(parsed.data.pid);
+    } catch {
+      result = { status: 'unknown' };
+    }
+    setIsChecking(false);
+
+    if (result.status !== 'found') {
+      setEntryErrors({ pid: pidProblem(result, parsed.data.pid) });
+      return;
     }
 
-    setPidWarning(false);
+    setWave(result.wave);
     setStep(STEP_INTRO);
   }
 
@@ -194,9 +255,9 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
 
     try {
       const result = await submitLinkAssessment({
+        agency,
         xsid,
         pid,
-        wave,
         timestamp_beginRSA: beganAt,
         discuss_te: discuss,
         ...answers,
@@ -254,57 +315,68 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
       {step === STEP_ENTRY ? (
         <>
           <Card title="Staff Entry" description="Staff enter these before handing over the tablet">
-            <Field label="Staff ID" htmlFor="xsid" required error={entryErrors.xsid}>
-              <TextInput
-                id="xsid"
-                value={xsid}
-                invalid={Boolean(entryErrors.xsid)}
-                onChange={(value) => {
-                  setXsid(value);
-                  setPidWarning(false);
-                }}
-              />
-            </Field>
-
-            <Field label="PID" htmlFor="pid" required error={entryErrors.pid}>
-              <TextInput
-                id="pid"
-                value={pid}
-                invalid={Boolean(entryErrors.pid)}
-                onChange={(value) => {
-                  setPid(value);
-                  setPidWarning(false);
-                }}
-              />
-            </Field>
-
-            <Field label="Meeting number" htmlFor="wave" required error={entryErrors.wave}>
-              <Select
-                id="wave"
-                value={wave}
-                invalid={Boolean(entryErrors.wave)}
-                placeholder="Select a meeting number"
-                options={WAVE_OPTIONS}
-                onChange={setWave}
-              />
-            </Field>
-
-            {pidWarning ? (
-              <Alert tone="info" title="PID not found">
-                We could not find PID {pid} in FileMaker. Check it, or continue anyway.
+            {roster === null || isLoadingRoster ? (
+              <p className="text-sm text-slate-600">
+                <Spinner /> Loading staff…
+              </p>
+            ) : !roster.ok ? (
+              <Alert title="Could not load the staff list">
+                {roster.error}
+                <div className="mt-3">
+                  <Button variant="secondary" onClick={refreshRoster}>
+                    Try again
+                  </Button>
+                </div>
               </Alert>
-            ) : null}
+            ) : (
+              <>
+                <Field label="Organization" htmlFor="agency" required error={entryErrors.agency}>
+                  <Select
+                    id="agency"
+                    value={agency}
+                    invalid={Boolean(entryErrors.agency)}
+                    placeholder="Select an organization"
+                    options={agencyOptions(roster.roster)}
+                    onChange={(value) => {
+                      setAgency(value);
+                      setXsid('');
+                    }}
+                  />
+                </Field>
+
+                <Field label="Staff name" htmlFor="xsid" required error={entryErrors.xsid}>
+                  <Select
+                    id="xsid"
+                    value={xsid}
+                    invalid={Boolean(entryErrors.xsid)}
+                    placeholder={agency ? 'Select your name' : 'Select an organization first'}
+                    options={staffOptions(roster.roster, agency)}
+                    onChange={setXsid}
+                  />
+                </Field>
+
+                <Field label="PID" htmlFor="pid" required error={entryErrors.pid}>
+                  <TextInput
+                    id="pid"
+                    value={pid}
+                    invalid={Boolean(entryErrors.pid)}
+                    onChange={(value) => {
+                      setPid(value);
+                      setEntryErrors(({ pid: _cleared, ...rest }) => rest);
+                    }}
+                  />
+                </Field>
+              </>
+            )}
           </Card>
 
           <ButtonRow>
             <span />
-            <Button onClick={handleBegin} disabled={isChecking}>
+            <Button onClick={handleBegin} disabled={isChecking || !roster?.ok}>
               {isChecking ? (
                 <>
-                  <Spinner /> Checking…
+                  <Spinner /> Checking PID…
                 </>
-              ) : pidWarning ? (
-                'Continue anyway'
               ) : (
                 'Begin'
               )}
@@ -373,7 +445,7 @@ export function RSALinkFlow({ initiallyUnlocked }: { initiallyUnlocked: boolean 
   );
 }
 
-function PasswordGate({ onUnlocked }: { onUnlocked: () => void }) {
+function PasswordGate({ onUnlocked }: { onUnlocked: () => void | Promise<void> }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
@@ -383,7 +455,7 @@ function PasswordGate({ onUnlocked }: { onUnlocked: () => void }) {
     setError(null);
     try {
       const result = await unlock(password);
-      if (result.ok) onUnlocked();
+      if (result.ok) await onUnlocked();
       else setError(result.error ?? 'Incorrect password.');
     } catch {
       setError('Could not reach the server. Try again.');

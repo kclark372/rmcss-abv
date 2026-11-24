@@ -7,7 +7,7 @@ import type { Wave } from './rsa-timeframe';
  * Validation for the staff-run self-assessment link (`/rsa`).
  *
  * Staff pick their organization and name and type the PID; the meeting comes
- * from FileMaker (`participants::wave_now_rmc`), never from the browser. The
+ * from FileMaker (`participants::date_enrolled`), never from the browser. The
  * participant supplies the answers. The server re-validates everything — client checks are for feedback.
  */
 
@@ -66,16 +66,14 @@ export type RosterResult =
 
 /**
  * The PID check. Only `found` lets staff continue; every other status is a hard
- * stop. `found` also carries the meeting read from `wave_now_rmc`: `waveLabel` is
- * the value as FileMaker holds it and `wave` is the meeting number it means.
+ * stop. `found` also carries the meeting worked out from `date_enrolled`: `wave` is
+ * the meeting number and `waveLabel` its name ("Enrollment", "M1", …).
  */
 export type PidCheckResult =
   | { status: 'found'; wave: Wave; waveLabel: string }
   /** No participant has this PID. */
   | { status: 'not_found' }
-  /** The participant exists but `wave_now_rmc` is empty: no meeting is open. */
+  /** No meeting is open: no enrollment date, not enrolled yet, or past day 353. */
   | { status: 'no_wave' }
-  /** `wave_now_rmc` holds a label this form does not recognise. */
-  | { status: 'bad_wave'; waveLabel: string }
   /** The lookup itself failed (layout not readable, server unreachable…). */
   | { status: 'unknown' };

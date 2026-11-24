@@ -72,8 +72,6 @@ function pidProblem(result: Exclude<Awaited<ReturnType<typeof checkPid>>, { stat
       return `PID ${pid} was not found. Check the number and try again.`;
     case 'no_wave':
       return `No RMC meeting is open for PID ${pid} right now.`;
-    case 'bad_wave':
-      return `PID ${pid} is set to the meeting "${result.waveLabel}", which this form does not recognise. Contact the data team.`;
     case 'unknown':
       return 'Could not verify this PID right now. Try again in a moment.';
   }

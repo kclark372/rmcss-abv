@@ -13,7 +13,7 @@ import {
   type RSALinkSubmitResult,
   type StaffMember,
 } from '@/lib/schemas/rsa-link';
-import { timeframeForWave, waveFromLabel } from '@/lib/schemas/rsa-timeframe';
+import { WAVE_LABELS, timeframeForWave, waveFromEnrollmentDate } from '@/lib/schemas/rsa-timeframe';
 
 /**
  * Server actions behind the staff-run self-assessment link (`/rsa`).
@@ -86,16 +86,21 @@ export async function loadRoster(): Promise<RosterResult> {
   }
 }
 
-/** Looks the PID up and reads which meeting is open for it (`wave_now_rmc`). */
+/**
+ * Looks the PID up and works out which meeting is open from
+ * `participants::date_enrolled` (see `waveFromEnrollmentDate` for the windows).
+ */
 async function lookupWave(session: FMSession, pid: string): Promise<PidCheckResult> {
   const [participant] = await session.find(LAYOUTS.participants, [{ pid: `==${pid}` }], 1);
   if (!participant) return { status: 'not_found' };
 
-  const waveLabel = fieldText(participant.fieldData.wave_now_rmc);
-  if (!waveLabel) return { status: 'no_wave' };
+  // A layout without the field is a setup problem, not "no meeting": fail loudly.
+  if (!('date_enrolled' in participant.fieldData)) {
+    throw new Error('The participants layout does not include the date_enrolled field');
+  }
 
-  const wave = waveFromLabel(waveLabel);
-  return wave ? { status: 'found', wave, waveLabel } : { status: 'bad_wave', waveLabel };
+  const wave = waveFromEnrollmentDate(fieldText(participant.fieldData.date_enrolled));
+  return wave ? { status: 'found', wave, waveLabel: WAVE_LABELS[wave] } : { status: 'no_wave' };
 }
 
 /**
@@ -159,8 +164,8 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
 
       await session.createRecord(LAYOUTS.rsaLink, {
         ...fieldData,
-        // xobs holds the meeting number (0, 1, 3, 6 or 9). Staff see it as the
-        // label in wave_now_rmc ("Enrollment", "M1", "M3", …).
+        // xobs holds the meeting number (0, 1, 3, 6 or 9), worked out from
+        // date_enrolled ("Enrollment", "M1", "M3", …).
         xobs: meeting.wave,
         timeframe: timeframeForWave(meeting.wave),
         agency: staff.agency,
@@ -177,13 +182,7 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
     if (outcome.status === 'not_found') {
       return { ok: false, error: 'That PID was not found. Go back and check it.' };
     }
-    if (outcome.status === 'no_wave') {
-      return { ok: false, error: 'No RMC meeting is open for this PID right now.' };
-    }
-    return {
-      ok: false,
-      error: `This PID's meeting "${outcome.status === 'bad_wave' ? outcome.waveLabel : ''}" is not one this form recognises.`,
-    };
+    return { ok: false, error: 'No RMC meeting is open for this PID right now.' };
   } catch (error) {
     if (error instanceof FMError) {
       console.error(`[rsa-link] FileMaker ${error.code}: ${error.message}`);

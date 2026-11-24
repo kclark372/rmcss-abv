@@ -14,12 +14,12 @@ import type { Wave } from './rsa-timeframe';
 export const staffEntrySchema = z.object({
   /** Written to `rsa::agency`. Must match the chosen staff member's agency. */
   agency: z.string().trim().min(1, 'Organization is required').max(100),
-  /** The chosen staff member's `staff::xsid`; written to `rsa::XSID`. */
+  /** The chosen staff member's `staff::xsid`; written to `rsa::xsid`. */
   xsid: z
     .string()
     .trim()
     .regex(/^[\w.-]{1,50}$/, 'Staff name is required'),
-  /** Written to `rsa::_PID` (a text field), without leading zeros. */
+  /** Written to `rsa::_pid` (a text field), without leading zeros. */
   pid: z
     .string()
     .trim()

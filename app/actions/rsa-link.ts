@@ -35,14 +35,22 @@ export async function unlock(password: unknown): Promise<{ ok: boolean; error?: 
 const MAX_ROSTER = 500;
 
 /**
+ * FileMaker's Data API returns number fields (like `xsid` and `is_active`) as
+ * JSON numbers, not strings. Reads any field value as trimmed text.
+ */
+function fieldText(value: unknown): string {
+  return value == null ? '' : String(value).trim();
+}
+
+/**
  * A `staff` record as a dropdown entry. Needs an organization, a name and a
  * staff ID; anyone explicitly marked inactive (`is_active` = 0) is left out.
  */
-function toStaffMember(fields: Record<string, string>): StaffMember | null {
-  const agency = fields.agency?.trim();
-  const name = fields.display_name?.trim();
-  const xsid = fields.xsid?.trim();
-  if (!agency || !name || !xsid || fields.is_active === '0') return null;
+function toStaffMember(fields: Record<string, unknown>): StaffMember | null {
+  const agency = fieldText(fields.agency);
+  const name = fieldText(fields.display_name);
+  const xsid = fieldText(fields.xsid);
+  if (!agency || !name || !xsid || fieldText(fields.is_active) === '0') return null;
   return { agency, name, xsid };
 }
 
@@ -50,7 +58,8 @@ function describeConfigError(error: unknown): string | null {
   if (error instanceof Error && error.message.startsWith('Missing FileMaker environment variables')) {
     return `${error.message}. Set them in Vercel for this environment and redeploy.`;
   }
-  if (error instanceof TypeError) {
+  // A failed network call. Other TypeErrors are bugs and must not be blamed on the server.
+  if (error instanceof TypeError && /fetch failed|Failed to fetch/i.test(error.message)) {
     return 'Could not reach the FileMaker server. Check FM_SERVER_URL and that the server is reachable from Vercel.';
   }
   return null;
@@ -83,7 +92,7 @@ async function lookupWave(session: FMSession, pid: string): Promise<PidCheckResu
   const [participant] = await session.find(LAYOUTS.participants, [{ pid: `==${pid}` }], 1);
   if (!participant) return { status: 'not_found' };
 
-  const waveLabel = participant.fieldData.wave_now_rmc?.trim() ?? '';
+  const waveLabel = fieldText(participant.fieldData.wave_now_rmc);
   if (!waveLabel) return { status: 'no_wave' };
 
   const wave = waveFromLabel(waveLabel);

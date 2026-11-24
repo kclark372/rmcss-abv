@@ -1,6 +1,5 @@
 'use server';
 
-import { randomUUID } from 'node:crypto';
 
 import { grantAccess, hasAccess, passwordMatches } from '@/lib/access';
 import { LAYOUTS, withSession, type FMSession } from '@/lib/fm/client';
@@ -129,9 +128,9 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
   const data = parsed.data;
 
   const fieldData: FMFieldData = {
-    __UUID: randomUUID(),
-    _PID: data.pid,
-    // XADT is set by FileMaker on creation. XOBS and timeframe come from the
+    // __uuid is filled by FileMaker (Get(UUID)) on creation; don't send one.
+    _pid: data.pid,
+    // XADT is set by FileMaker on creation. xobs and timeframe come from the
     // participant's current meeting, read below.
     discuss_te: data.discuss_te,
     timestamp_beginRSA: data.timestamp_beginRSA ? toFMLocalTimestamp(data.timestamp_beginRSA) : '',
@@ -160,13 +159,13 @@ export async function submitLinkAssessment(input: unknown): Promise<RSALinkSubmi
 
       await session.createRecord(LAYOUTS.rsaLink, {
         ...fieldData,
-        // XOBS holds the meeting number (0, 1, 3, 6 or 9). Staff see it as the
+        // xobs holds the meeting number (0, 1, 3, 6 or 9). Staff see it as the
         // label in wave_now_rmc ("Enrollment", "M1", "M3", …).
-        XOBS: meeting.wave,
+        xobs: meeting.wave,
         timeframe: timeframeForWave(meeting.wave),
         agency: staff.agency,
         name_pref_full_staff: staff.name,
-        XSID: staff.xsid,
+        xsid: staff.xsid,
       });
       return 'saved' as const;
     });
